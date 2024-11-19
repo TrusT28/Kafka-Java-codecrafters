@@ -60,7 +60,7 @@ public class Main {
         outputStream.write(message_size);
         outputStream.write(input_correlation_id);
         // Only support 0-4 versions
-        if(bytesToInt(input_request_api_version)>=0 || bytesToInt(input_request_api_version)<=4) {
+        if(bytesToInt(input_request_api_version)>=0 && bytesToInt(input_request_api_version)<=4) {
           // Send data to client
           byte[] body = {0,0,0,0};
           outputStream.write(body);
