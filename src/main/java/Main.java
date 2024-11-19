@@ -64,6 +64,7 @@ public class Main {
           byte[] minVersion = shortToBytes((short) 0);
           byte[] maxVersion = shortToBytes((short) 4);
           byte [] throttle_time_ms = intToBytes(100);
+          byte tag_buffer = 0;
           // specifies the size of the header and body.
           byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length);
 
@@ -74,8 +75,9 @@ public class Main {
           outputStream.write(apiVersion);
           outputStream.write(minVersion);
           outputStream.write(maxVersion);
+          outputStream.write(tag_buffer);
           outputStream.write(throttle_time_ms);
-          outputStream.write(null);
+          outputStream.write(tag_buffer);
         }
         else {
           // Throw appropriate error code
