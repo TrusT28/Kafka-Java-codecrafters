@@ -66,7 +66,7 @@ public class Main {
           outputStream.write(body);
         }
         else {
-          byte[] errorCode = intToBytes(35);
+          byte[] errorCode = shortToBytes((short) 35);
           System.out.println("Length is " + errorCode.length);
           outputStream.write(errorCode);
         }
@@ -85,8 +85,8 @@ public class Main {
     }
   }
 
-  public static byte[] intToBytes(int value) {
-    return ByteBuffer.allocate(2).putInt(value).array();
+  public static byte[] shortToBytes(short value) {
+    return ByteBuffer.allocate(2).putShort(value).array();
   }
 
 }
