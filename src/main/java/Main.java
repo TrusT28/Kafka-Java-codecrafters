@@ -66,7 +66,6 @@ public class Main {
           byte [] throttle_time_ms = intToBytes(0);
 
           byte[] message_size = intToBytes(errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length-5);
-          System.out.println("Message_size is" + message_size);
           // Send data to client
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
@@ -81,7 +80,6 @@ public class Main {
           System.out.println("Handling a wrong request");
           byte[] errorCode = shortToBytes((short) 35);
           byte[] message_size = intToBytes(errorCode.length-1);
-          System.out.println("Message_size is" + message_size);
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
           outputStream.write(errorCode);
@@ -102,14 +100,14 @@ public class Main {
   }
 
   public static byte[] shortToBytes(short value) {
+    System.out.println("shortToBytes "+ value);
     byte[] result =  ByteBuffer.allocate(2).putShort(value).array();
-    System.out.println("Length is " + result.length);
     return result;
   }
 
   public static byte[] intToBytes(int value) {
+    System.out.println("intToBytes "+ value);
     byte[] result =  ByteBuffer.allocate(4).putInt(value).array();
-    System.out.println("Length is " + result.length);
     return result;
   }
 
