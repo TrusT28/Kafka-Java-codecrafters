@@ -56,11 +56,11 @@ public class Main {
       // Only support ApiVersions request
       if (bytesToInt(input_request_api_key) == 18) {
         OutputStream outputStream = clientSocket.getOutputStream();
-        byte[] message_size = {0,0,0,4};
-        outputStream.write(message_size);
-        outputStream.write(input_correlation_id);
         // Only support 0-4 versions
         if(bytesToInt(input_request_api_version)>=0 && bytesToInt(input_request_api_version)<=4) {
+          byte[] message_size = intToBytes(8);
+          outputStream.write(message_size);
+          outputStream.write(input_correlation_id);
           // Send data to client
           byte[] errorCode = shortToBytes((short) 0);
           outputStream.write(errorCode);
@@ -72,9 +72,11 @@ public class Main {
           outputStream.write(maxVersion);
         }
         else {
+          byte[] message_size = intToBytes(2);
+          outputStream.write(message_size);
+          outputStream.write(input_correlation_id);
           // Throw appropriate error code
           byte[] errorCode = shortToBytes((short) 35);
-          System.out.println("Length is " + errorCode.length);
           outputStream.write(errorCode);
         }
       }
@@ -94,6 +96,12 @@ public class Main {
 
   public static byte[] shortToBytes(short value) {
     byte[] result =  ByteBuffer.allocate(2).putShort(value).array();
+    System.out.println("Length is " + result.length);
+    return result;
+  }
+
+  public static byte[] intToBytes(int value) {
+    byte[] result =  ByteBuffer.allocate(4).putInt(value).array();
     System.out.println("Length is " + result.length);
     return result;
   }
