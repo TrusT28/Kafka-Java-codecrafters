@@ -62,10 +62,17 @@ public class Main {
         // Only support 0-4 versions
         if(bytesToInt(input_request_api_version)>=0 && bytesToInt(input_request_api_version)<=4) {
           // Send data to client
-          byte[] body = {0,0,0,0};
-          outputStream.write(body);
+          byte[] errorCode = shortToBytes((short) 0);
+          outputStream.write(errorCode);
+          byte[] apiVersion = shortToBytes((short) 18);
+          outputStream.write(apiVersion);
+          byte[] minVersion = shortToBytes((short) 0);
+          outputStream.write(minVersion);
+          byte[] maxVersion = shortToBytes((short) 4);
+          outputStream.write(maxVersion);
         }
         else {
+          // Throw appropriate error code
           byte[] errorCode = shortToBytes((short) 35);
           System.out.println("Length is " + errorCode.length);
           outputStream.write(errorCode);
