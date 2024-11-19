@@ -65,7 +65,7 @@ public class Main {
           byte[] maxVersion = shortToBytes((short) 4);
           byte [] throttle_time_ms = intToBytes(0);
 
-          byte[] message_size = intToBytes(errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length-5);
+          byte[] message_size = intToBytes(errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length);
           // Send data to client
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
