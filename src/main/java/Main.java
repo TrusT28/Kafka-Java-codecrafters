@@ -93,7 +93,9 @@ public class Main {
   }
 
   public static byte[] shortToBytes(short value) {
-    return ByteBuffer.allocate(2).putShort(value).array();
+    byte[] result =  ByteBuffer.allocate(2).putShort(value).array();
+    System.out.println("Length is " + result.length);
+    return result;
   }
 
 }
