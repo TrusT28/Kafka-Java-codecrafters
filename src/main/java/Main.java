@@ -60,22 +60,26 @@ public class Main {
         if(bytesToInt(input_request_api_version)>=0 && bytesToInt(input_request_api_version)<=4) {
           System.out.println("Handling a proper request");
           byte[] errorCode = shortToBytes((short) 0);
+          byte apiKeysArrayDefinition = (byte) 2; // 1 element in COMPACT ARRAY + 1 for N+1 encoding
           byte[] apiVersion = shortToBytes((short) 18);
           byte[] minVersion = shortToBytes((short) 0);
           byte[] maxVersion = shortToBytes((short) 4);
           byte [] throttle_time_ms = intToBytes(100);
           byte tag_buffer = 0;
           // specifies the size of the header and body.
-          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length+2);
+          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length+3);
 
           // Send data to client
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
           outputStream.write(errorCode);
+
+          outputStream.write(apiKeysArrayDefinition);
           outputStream.write(apiVersion);
           outputStream.write(minVersion);
           outputStream.write(maxVersion);
           outputStream.write(tag_buffer);
+          
           outputStream.write(throttle_time_ms);
           outputStream.write(tag_buffer);
         }
@@ -113,6 +117,12 @@ public class Main {
   public static byte[] intToBytes(int value) {
     System.out.println("intToBytes "+ value);
     byte[] result =  ByteBuffer.allocate(4).putInt(value).array();
+    return result;
+  }
+
+  public static byte[] intToUnsignedVarBit(int value) {
+    System.out.println("intToBytes "+ value);
+    byte[] result =  ByteBuffer.allocate(5).putInt(value).array();
     return result;
   }
 
