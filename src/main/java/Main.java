@@ -66,7 +66,7 @@ public class Main {
           byte [] throttle_time_ms = intToBytes(100);
           byte tag_buffer = 0;
           // specifies the size of the header and body.
-          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length);
+          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length+2);
 
           // Send data to client
           outputStream.write(message_size);
