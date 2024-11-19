@@ -58,25 +58,28 @@ public class Main {
         OutputStream outputStream = clientSocket.getOutputStream();
         // Only support 0-4 versions
         if(bytesToInt(input_request_api_version)>=0 && bytesToInt(input_request_api_version)<=4) {
-          byte[] message_size = intToBytes(8);
+          byte[] errorCode = shortToBytes((short) 0);
+          byte[] apiVersion = shortToBytes((short) 18);
+          byte[] minVersion = shortToBytes((short) 0);
+          byte[] maxVersion = shortToBytes((short) 4);
+          byte [] throttle_time_ms = intToBytes(0);
+
+          byte[] message_size = intToBytes(errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length);
+          // Send data to client
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
-          // Send data to client
-          byte[] errorCode = shortToBytes((short) 0);
           outputStream.write(errorCode);
-          byte[] apiVersion = shortToBytes((short) 18);
           outputStream.write(apiVersion);
-          byte[] minVersion = shortToBytes((short) 0);
           outputStream.write(minVersion);
-          byte[] maxVersion = shortToBytes((short) 4);
           outputStream.write(maxVersion);
+          outputStream.write(throttle_time_ms);
         }
         else {
-          byte[] message_size = intToBytes(2);
-          outputStream.write(message_size);
-          outputStream.write(input_correlation_id);
           // Throw appropriate error code
           byte[] errorCode = shortToBytes((short) 35);
+          byte[] message_size = intToBytes(errorCode.length);
+          outputStream.write(message_size);
+          outputStream.write(input_correlation_id);
           outputStream.write(errorCode);
         }
       }
