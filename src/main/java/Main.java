@@ -65,7 +65,8 @@ public class Main {
           byte[] maxVersion = shortToBytes((short) 4);
           byte [] throttle_time_ms = intToBytes(0);
 
-          byte[] message_size = intToBytes(errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length);
+          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length);
+
           // Send data to client
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
@@ -79,7 +80,7 @@ public class Main {
           // Throw appropriate error code
           System.out.println("Handling a wrong request");
           byte[] errorCode = shortToBytes((short) 35);
-          byte[] message_size = intToBytes(errorCode.length-1);
+          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length);
           outputStream.write(message_size);
           outputStream.write(input_correlation_id);
           outputStream.write(errorCode);
