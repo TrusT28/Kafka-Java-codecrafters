@@ -13,10 +13,8 @@ public class API {
     private final int WRONG_REQUEST_ERROR_CODE = 35;
     ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
 
-    public void apiVersionsEndpoint(Socket clientSocket) throws IOException {
+    public void apiVersionsEndpoint(DataInputStream dataInputStream, OutputStream outputStream) throws IOException {
         // Receive data from client and parse
-        OutputStream outputStream = clientSocket.getOutputStream();
-        DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
         try {
             byte[] input_message_size = new byte[4];
             byte[] input_request_api_key = new byte[2];
@@ -26,6 +24,8 @@ public class API {
             dataInputStream.readFully(input_request_api_key);
             dataInputStream.readFully(input_request_api_version);
             dataInputStream.readFully(input_correlation_id);
+            byte[] body = new byte[bytesToInt(input_message_size)];
+            dataInputStream.readFully(body);
             // Only support ApiVersions request
             int API_VERSIONS_KEY = 18;
             if (bytesToInt(input_request_api_key) == API_VERSIONS_KEY) {
