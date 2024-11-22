@@ -66,6 +66,8 @@ public class API {
                 outputStream.write(input_correlation_id);
                 outputStream.write(errorCode);
             }
+            System.out.println("Closing the output stream");
+            outputStream.close();
         }
     }
 }

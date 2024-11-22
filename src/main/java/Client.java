@@ -22,6 +22,7 @@ public class Client implements Runnable {
         finally {
             try {
                 if (clientSocket != null) {
+                    System.out.println("Closing the client !");
                     clientSocket.close();
                 }
             } catch (IOException e) {
