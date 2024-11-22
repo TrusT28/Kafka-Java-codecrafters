@@ -67,8 +67,9 @@ public class API {
                 outputStream.write(errorCode);
             }
         }
-        System.out.println("Closing the output stream");
+        System.out.println("Closing the streams");
         outputStream.close();
         inputStream.close();
+        System.out.println("streams closed");
     }
 }

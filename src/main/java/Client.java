@@ -13,7 +13,7 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Got a client !");
+            System.out.println("Got a client!");
             API api = new API();
             // Determine the call endpoint and call it
             api.apiVersionsEndpoint(clientSocket);

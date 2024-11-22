@@ -23,7 +23,7 @@ public class Main {
                         System.out.println("Error accepting client connection" + e);
                         break;
                     }
-                    clientProcessingPool.execute(new Client(clientSocket));
+                    clientProcessingPool.submit(new Client(clientSocket));
                 }
                 clientProcessingPool.shutdown();
                 System.out.println("Server Stopped");
