@@ -23,6 +23,7 @@ public class Client implements Runnable {
             OutputStream outputStream = clientSocket.getOutputStream();
             while (true) {
                 try {
+                    System.out.println("API in progress!");
                     api.apiVersionsEndpoint(dataInputStream, outputStream);
                     System.out.println("API Processed!");
                 } catch (EOFException e) {
