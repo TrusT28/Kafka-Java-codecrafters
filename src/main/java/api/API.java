@@ -1,21 +1,23 @@
 package api;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.net.SocketException;
 
 import static utils.Utils.*;
 
 public class API {
 
     private final int WRONG_REQUEST_ERROR_CODE = 35;
+    ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
 
     public void apiVersionsEndpoint(Socket clientSocket) throws IOException {
         // Receive data from client and parse
         OutputStream outputStream = clientSocket.getOutputStream();
-        try (DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
-             ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream()
-        ) {
+        DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
+        try {
             byte[] input_message_size = new byte[4];
             byte[] input_request_api_key = new byte[2];
             byte[] input_request_api_version = new byte[2];
@@ -62,14 +64,9 @@ public class API {
                 outputStream.write(responseBytes);
                 outputStream.flush();
             }
-        } catch (EOFException e) {
-            System.err.println("Client disconnected abruptly: " + e.getMessage());
-        } catch (SocketException e) {
-            System.err.println("Socket error with client: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("I/O error while processing client: " + e.getMessage());
-        } finally {
-            System.out.println("Cleaning up after client...");
+        }
+        finally {
+            responseBuffer.close();
         }
     }
 }
