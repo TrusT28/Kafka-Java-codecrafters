@@ -1,6 +1,7 @@
+import api.API;
+
 import java.io.IOException;
 import java.net.Socket;
-import api.API;
 
 public class Client implements Runnable {
     private final Socket clientSocket;
@@ -12,17 +13,17 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-        System.out.println("Got a client !");
-        API api = new API();
-        // Determine the call endpoint and call it
-        api.apiVersionsEndpoint(clientSocket);
+            System.out.println("Got a client !");
+            API api = new API();
+            // Determine the call endpoint and call it
+            api.apiVersionsEndpoint(clientSocket);
+            System.out.println("API Processed!");
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             try {
                 if (clientSocket != null) {
-                    System.out.println("Closing the client !");
+                    System.out.println("Closing the client!");
                     clientSocket.close();
                 }
             } catch (IOException e) {

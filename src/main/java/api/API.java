@@ -14,6 +14,7 @@ public class API {
     public void apiVersionsEndpoint(Socket clientSocket) throws IOException {
         // Receive data from client and parse
         InputStream inputStream = clientSocket.getInputStream();
+        OutputStream outputStream = clientSocket.getOutputStream();
         byte[] input_message_size = new byte[4];
         inputStream.read(input_message_size);
 
@@ -29,7 +30,6 @@ public class API {
         // Only support ApiVersions request
         int API_VERSIONS_KEY = 18;
         if (bytesToInt(input_request_api_key) == API_VERSIONS_KEY) {
-            OutputStream outputStream = clientSocket.getOutputStream();
             // Only support 0-4 versions
             if (bytesToInt(input_request_api_version) >= 0 && bytesToInt(input_request_api_version) <= 4) {
                 System.out.println("Handling a proper request");
@@ -66,8 +66,9 @@ public class API {
                 outputStream.write(input_correlation_id);
                 outputStream.write(errorCode);
             }
-            System.out.println("Closing the output stream");
-            outputStream.close();
         }
+        System.out.println("Closing the output stream");
+        outputStream.close();
+        inputStream.close();
     }
 }
