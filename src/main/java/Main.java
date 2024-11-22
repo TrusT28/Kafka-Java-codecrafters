@@ -28,6 +28,8 @@ public class Main {
                 }
             }
         };
+        Thread serverThread = new Thread(serverTask);
+        serverThread.start();
     }
 
 }
