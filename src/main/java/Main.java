@@ -3,16 +3,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+
+import static utils.Utils.*;
 
 public class Main {
   public static void main(String[] args){
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    System.err.println("Logs from your program will appear here!");
-
-    // Uncomment this block to pass the first stage
-    // 
     ServerSocket serverSocket = null;
     Socket clientSocket = null;
     int port = 9092;
@@ -64,7 +59,7 @@ public class Main {
           byte[] apiVersion = shortToBytes((short) 18);
           byte[] minVersion = shortToBytes((short) 0);
           byte[] maxVersion = shortToBytes((short) 4);
-          byte [] throttle_time_ms = intToBytes(100);
+          byte[] throttle_time_ms = intToBytes(100);
           byte tag_buffer = 0;
           // specifies the size of the header and body.
           byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length+3);
@@ -94,36 +89,6 @@ public class Main {
           outputStream.write(errorCode);
         }
       }
-  }
-
-  public static int bytesToInt(byte[] bytes) {
-    if (bytes.length == 4) {
-      return ByteBuffer.wrap(bytes).getInt();
-    }
-    else if(bytes.length == 2) {
-      return (int) ByteBuffer.wrap(bytes).getShort();
-    }
-    else {
-      throw new IllegalArgumentException("Array must contain exactly 2 or 4 bytes");
-    }
-  }
-
-  public static byte[] shortToBytes(short value) {
-    System.out.println("shortToBytes "+ value);
-    byte[] result =  ByteBuffer.allocate(2).putShort(value).array();
-    return result;
-  }
-
-  public static byte[] intToBytes(int value) {
-    System.out.println("intToBytes "+ value);
-    byte[] result =  ByteBuffer.allocate(4).putInt(value).array();
-    return result;
-  }
-
-  public static byte[] intToUnsignedVarBit(int value) {
-    System.out.println("intToBytes "+ value);
-    byte[] result =  ByteBuffer.allocate(5).putInt(value).array();
-    return result;
   }
 
 }
