@@ -9,30 +9,28 @@ public class Main {
         final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
 
         Runnable serverTask = () -> {
-            try {
-                ServerSocket serverSocket = new ServerSocket(9092);
+            try(ServerSocket serverSocket = new ServerSocket(9092)) {
                 // Since the tester restarts your program quite often, setting SO_REUSEADDR
                 // ensures that we don't run into 'Address already in use' errors
                 serverSocket.setReuseAddress(true);
                 while (true) {
-                    Socket clientSocket = null;
-                    // Wait for connection from client.
                     try {
-                        clientSocket = serverSocket.accept();
+                        Socket clientSocket = serverSocket.accept();
+                        clientProcessingPool.submit(new Client(clientSocket));
                     } catch (IOException e) {
                         System.out.println("Error accepting client connection" + e);
                         break;
                     }
-                    clientProcessingPool.submit(new Client(clientSocket));
                 }
-                clientProcessingPool.shutdown();
-                System.out.println("Server Stopped");
+                System.out.println("While loop is over");
             } catch (IOException e) {
                 System.out.println("IOException: " + e.getMessage());
+            } finally {
+                clientProcessingPool.shutdown();
+                System.out.println("Server stopped");
             }
         };
-        Thread serverThread = new Thread(serverTask);
-        serverThread.start();
+        new Thread(serverTask).start();
     }
 
 }

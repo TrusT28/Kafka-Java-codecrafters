@@ -21,13 +21,13 @@ public class Client implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (clientSocket != null) {
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                try {
                     System.out.println("Closing the client!");
                     clientSocket.close();
-                }
-            } catch (IOException e) {
+                } catch (IOException e) {
                 System.out.println("IOException: " + e.getMessage());
+                }
             }
         }
     }
