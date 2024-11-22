@@ -24,7 +24,8 @@ public class API {
             dataInputStream.readFully(input_request_api_key);
             dataInputStream.readFully(input_request_api_version);
             dataInputStream.readFully(input_correlation_id);
-            byte[] body = new byte[bytesToInt(input_message_size)];
+            byte[] body = new byte[bytesToInt(input_message_size)-2-2-4];
+            System.out.println("Body length is " + body.length);
             dataInputStream.readFully(body);
             // Only support ApiVersions request
             int API_VERSIONS_KEY = 18;
