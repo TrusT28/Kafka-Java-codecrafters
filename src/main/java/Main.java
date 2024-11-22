@@ -1,94 +1,33 @@
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import static utils.Utils.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
-  public static void main(String[] args){
-    ServerSocket serverSocket = null;
-    Socket clientSocket = null;
-    int port = 9092;
-    try {
-      serverSocket = new ServerSocket(port);
-      // Since the tester restarts your program quite often, setting SO_REUSEADDR
-      // ensures that we don't run into 'Address already in use' errors
-      serverSocket.setReuseAddress(true);
-      // Wait for connection from client.
-      clientSocket = serverSocket.accept();
+    public static void main(String[] args) {
+        final ExecutorService clientProcessingPool = Executors.newFixedThreadPool(10);
 
-      apiVersionsEndpoint(clientSocket);
-    } catch (IOException e) {
-      System.out.println("IOException: " + e.getMessage());
-    } finally {
-      try {
-        if (clientSocket != null) {
-          clientSocket.close();
-        }
-      } catch (IOException e) {
-        System.out.println("IOException: " + e.getMessage());
-      }
+        Runnable serverTask = new Runnable() {
+            @Override
+            public void run() {
+                ServerSocket serverSocket = null;
+                int port = 9092;
+                try {
+                    serverSocket = new ServerSocket(port);
+                    // Since the tester restarts your program quite often, setting SO_REUSEADDR
+                    // ensures that we don't run into 'Address already in use' errors
+                    serverSocket.setReuseAddress(true);
+                    while(true) {
+                        // Wait for connection from client.
+                        Socket clientSocket = serverSocket.accept();
+                        clientProcessingPool.submit(new Client(clientSocket));
+                    }
+                } catch (IOException e) {
+                    System.out.println("IOException: " + e.getMessage());
+                }
+            }
+        };
     }
-  }
-
-  public static void apiVersionsEndpoint(Socket clientSocket) throws IOException {
-      // Receive data from client and parse
-      InputStream inputStream = clientSocket.getInputStream();
-      byte[] input_message_size = new byte[4];
-      inputStream.read(input_message_size);
-
-      byte[] input_request_api_key = new byte[2];
-      inputStream.read(input_request_api_key);
-
-      byte[] input_request_api_version = new byte[2];
-      inputStream.read(input_request_api_version);
-
-      byte[] input_correlation_id = new byte[4];
-      inputStream.read(input_correlation_id);
-
-      // Only support ApiVersions request
-      if (bytesToInt(input_request_api_key) == 18) {
-        OutputStream outputStream = clientSocket.getOutputStream();
-        // Only support 0-4 versions
-        if(bytesToInt(input_request_api_version)>=0 && bytesToInt(input_request_api_version)<=4) {
-          System.out.println("Handling a proper request");
-          byte[] errorCode = shortToBytes((short) 0);
-          byte apiKeysArrayDefinition = (byte) 2; // 1 element in COMPACT ARRAY + 1 for N+1 encoding
-          byte[] apiVersion = shortToBytes((short) 18);
-          byte[] minVersion = shortToBytes((short) 0);
-          byte[] maxVersion = shortToBytes((short) 4);
-          byte[] throttle_time_ms = intToBytes(100);
-          byte tag_buffer = 0;
-          // specifies the size of the header and body.
-          byte[] message_size = intToBytes(input_correlation_id.length + errorCode.length+apiVersion.length+minVersion.length+maxVersion.length+throttle_time_ms.length+3);
-
-          // Send data to client
-          outputStream.write(message_size);
-          outputStream.write(input_correlation_id);
-          outputStream.write(errorCode);
-
-          outputStream.write(apiKeysArrayDefinition);
-          outputStream.write(apiVersion);
-          outputStream.write(minVersion);
-          outputStream.write(maxVersion);
-          outputStream.write(tag_buffer);
-          
-          outputStream.write(throttle_time_ms);
-          outputStream.write(tag_buffer);
-        }
-        else {
-          // Throw appropriate error code
-          System.out.println("Handling a wrong request");
-          byte[] errorCode = shortToBytes((short) 35);
-          // specifies the size of the header and body.
-          byte[] message_size = intToBytes(6);
-          outputStream.write(message_size);
-          outputStream.write(input_correlation_id);
-          outputStream.write(errorCode);
-        }
-      }
-  }
 
 }
