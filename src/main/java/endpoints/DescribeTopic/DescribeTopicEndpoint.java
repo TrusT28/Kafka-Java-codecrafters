@@ -77,7 +77,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
         byte[] topic_name_length = new byte[1];
         topic.read(topic_name_length);
-        byte[] topic_name = new byte[bytesToInt(topic_name_length)-1];
+        byte[] topic_name = new byte[(topic_name_length[0])-1];
         topic.read(topic_name);
         // Tag Buffer
         topic.read();
