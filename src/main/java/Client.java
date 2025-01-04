@@ -28,6 +28,10 @@ public class Client implements Runnable {
                     api.processAPI(dataInputStream, outputStream);
                     System.out.println("API Processed!");
                 }
+                catch(EOFException e) {
+                    System.err.println("Client closed connection." + e.getMessage());
+                    break;
+                }
                 catch (ConstructorException e) {
                     System.err.println("Error processing client request. Constructor failed to parse input data: " + e.getMessage());
                     break;
