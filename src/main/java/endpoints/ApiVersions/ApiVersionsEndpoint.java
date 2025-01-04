@@ -23,7 +23,7 @@ public class ApiVersionsEndpoint implements KafkaEndpoint{
 
     @Override
     public void process(RequestBody requestBody, OutputStream outputStream) throws IOException {
-                    // Only support 0-4 versions
+            // Only support 0-4 versions
             if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 4) {
                 System.out.println("Handling a proper request");
                 byte[] errorCode = shortToBytes((short) 0);
