@@ -6,14 +6,16 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 
-public class InputData {
+import utils.ConstructorException;
+
+public class RequestBody {
     public byte[] input_message_size = new byte[4];
     public byte[] input_request_api_key = new byte[2];
     public byte[] input_request_api_version = new byte[2];
     public byte[] input_correlation_id = new byte[4];
     public byte[] body = null;
 
-    public InputData(DataInputStream dataInputStream) throws ConstructorException, EOFException{
+    public RequestBody(DataInputStream dataInputStream) throws ConstructorException, EOFException{
         try {
             dataInputStream.readFully(input_message_size);
             dataInputStream.readFully(input_request_api_key);
