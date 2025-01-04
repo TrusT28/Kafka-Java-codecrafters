@@ -6,20 +6,18 @@ import static utils.Utils.shortToBytes;
 import utils.ErrorCodes;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.EOFException;
+import java.io.IOException;
 import java.io.OutputStream;
 
 import endpoints.KafkaEndpoint;
 import api.RequestBody;
-import utils.ConstructorException;
 
 public class DescribeTopicEndpoint implements KafkaEndpoint {
 
     ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
 
     @Override
-    public void process(RequestBody requestBody, OutputStream outputStream) throws ConstructorException, EOFException {
+    public void process(RequestBody requestBody, OutputStream outputStream) throws IOException {
         responseBuffer.reset();
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
@@ -38,7 +36,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         } else {
             // Throw appropriate error code
             System.out.println("Handling a wrong request");
-            byte[] errorCode = shortToBytes((short) WRONG_REQUEST_ERROR_CODE);
+            byte[] errorCode = shortToBytes((short) ErrorCodes.WRONG_REQUEST_ERROR_CODE);
             // specifies the size of the header and body.
             responseBuffer.write(requestBody.input_correlation_id);
             responseBuffer.write(errorCode);

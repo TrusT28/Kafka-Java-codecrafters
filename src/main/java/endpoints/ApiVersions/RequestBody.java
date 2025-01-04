@@ -1,4 +1,4 @@
-package utils;
+package endpoints.ApiVersions;
 
 import static utils.Utils.bytesToInt;
 
