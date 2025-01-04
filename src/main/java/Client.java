@@ -1,4 +1,5 @@
 import api.API;
+import utils.ConstructorException;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -24,14 +25,16 @@ public class Client implements Runnable {
             while (true) {
                 try {
                     System.out.println("API in progress!");
-                    api.apiVersionsEndpoint(dataInputStream, outputStream);
+                    api.processAPI(dataInputStream, outputStream);
                     System.out.println("API Processed!");
-                } catch (EOFException e) {
-                    System.out.println("Client disconnected: " + e.getMessage());
-                    break; // Exit loop on client disconnection
-                } catch (IOException e) {
-                    System.err.println("Error processing client request: " + e.getMessage());
-                    break; // Exit loop on other IO errors
+                }
+                catch (ConstructorException e) {
+                    System.err.println("Error processing client request. Constructor failed to parse input data: " + e.getMessage());
+                    break;
+                }
+                catch (Throwable e) {
+                    System.out.println("Something went wrong: " + e.getMessage());
+                    break;
                 }
             }
         } catch (IOException e) {
