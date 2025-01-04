@@ -33,7 +33,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 responseBuffer.write(requestBody.input_correlation_id);
                 responseBuffer.write(tag_buffer);
             // Throttle time
-                byte[] throttle_time_ms = intToBytes(100);
+                byte[] throttle_time_ms = intToBytes(0);
                 responseBuffer.write(throttle_time_ms);
             // Topics Array
                 ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
