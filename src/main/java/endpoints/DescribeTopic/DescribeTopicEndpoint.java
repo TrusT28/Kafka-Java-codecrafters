@@ -44,7 +44,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
             // Topics Array
                 byte[][] input_topics_names = new byte[(input_topics_array_size[0])-1][];
 
-                for(int i=0; i<bytesToInt(input_topics_array_size); i++) {
+                for(int i=0; i<input_topics_names.length; i++) {
                     input_topics_names[i] = readTopicName(bodyStream);
                 }
 
