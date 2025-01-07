@@ -78,6 +78,7 @@ public class ClusterMetadataReader {
             inputStream.read(record.recordLength);
             System.out.println("This record length is "+ record.recordLength[0]);
             System.out.println("This record length unsigned is "+  Byte.toUnsignedInt(record.recordLength[0]));
+            System.out.println("This record length signed is "+ (int) record.recordLength[0]);
             inputStream.read(record.attributes);
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
