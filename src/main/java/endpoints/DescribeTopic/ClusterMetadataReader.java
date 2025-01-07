@@ -3,9 +3,12 @@ package endpoints.DescribeTopic;
 import static utils.Utils.bytesToInt;
 
 import java.beans.FeatureDescriptor;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import org.apache.commons.io.FileUtils;
 
 import endpoints.DescribeTopic.models.Batch;
 import endpoints.DescribeTopic.models.FeatureLevelValue;
@@ -19,9 +22,8 @@ public class ClusterMetadataReader {
     
         public MetadataBatches parseClusterMetadataFile() throws IOException {
             System.out.println("Parsing cluster metadata file");
-            String file = "/tmp/kraft-combined-logs/__cluster_metadata-0/00000000000000000000.log";
-            ClassLoader classLoader = getClass().getClassLoader();
-            InputStream inputStream = classLoader.getResourceAsStream(file);
+            String fileName = "/tmp/kraft-combined-logs/__cluster_metadata-0/00000000000000000000.log";
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(FileUtils.readFileToByteArray(new File(fileName)));
             System.out.println("metadata logs file input stream is " + inputStream.available());
             MetadataBatches batches = new MetadataBatches();
             try {
