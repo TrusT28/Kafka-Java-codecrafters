@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.math.BigInteger;
 import org.apache.commons.io.FileUtils;
 
 import endpoints.DescribeTopic.models.Batch;
@@ -35,6 +36,8 @@ public class ClusterMetadataReader {
                         inputStream.close();
                         break;
                     }
+                    int bigInteger = new BigInteger(batch.baseOffset).intValue();
+                    System.out.println("baseOffset is " + batch.baseOffset + " or " + bigInteger);
 
                     inputStream.read(batch.batchLength);
                     inputStream.read(batch.partitionLeaderEpoch);
@@ -77,8 +80,6 @@ public class ClusterMetadataReader {
             Record record = new Record();
             inputStream.read(record.recordLength);
             System.out.println("This record length is "+ record.recordLength[0]);
-            System.out.println("This record length unsigned is "+  Byte.toUnsignedInt(record.recordLength[0]));
-            System.out.println("This record length signed is "+ (int) record.recordLength[0]);
             inputStream.read(record.attributes);
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
