@@ -75,7 +75,7 @@ public class ClusterMetadataReader {
         public Record readRecord(InputStream inputStream) throws IOException{
             Record record = new Record();
             inputStream.read(record.recordLength);
-            System.out.println("This record length is "+ record.recordLength);
+            System.out.println("This record length is "+ record.recordLength[0]);
             inputStream.read(record.attributes);
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
@@ -86,7 +86,7 @@ public class ClusterMetadataReader {
                 record.key = key;
             }
             inputStream.read(record.valueLength);
-            System.out.println("This record value length is "+ record.valueLength);
+            System.out.println("This record value length is "+ record.valueLength[0]);
             if(record.valueLength[0] != 0){
                 record.value = readValue(inputStream, record.valueLength[0]);
             }
