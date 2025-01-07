@@ -35,6 +35,7 @@ public class ClusterMetadataReader {
                         inputStream.close();
                         break;
                     }
+
                     inputStream.read(batch.batchLength);
                     inputStream.read(batch.partitionLeaderEpoch);
                     inputStream.read(batch.magicByte);
@@ -48,7 +49,7 @@ public class ClusterMetadataReader {
                     inputStream.read(batch.producerEpoch);
                     inputStream.read(batch.baseSequence);
                     inputStream.read(batch.amountOfRecords);
-                    if(bytesToInt(batch.amountOfRecords)!=0) {
+                    if(bytesToInt(batch.amountOfRecords)>0) {
                         System.out.println("There are " + bytesToInt(batch.amountOfRecords) + " records");
                         Record[] records = new Record[bytesToInt(batch.amountOfRecords)];
                         for(int i=0; i<records.length; i++) {
@@ -76,6 +77,7 @@ public class ClusterMetadataReader {
             Record record = new Record();
             inputStream.read(record.recordLength);
             System.out.println("This record length is "+ record.recordLength[0]);
+            System.out.println("This record length unsigned is "+  Byte.toUnsignedInt(record.recordLength[0]));
             inputStream.read(record.attributes);
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
