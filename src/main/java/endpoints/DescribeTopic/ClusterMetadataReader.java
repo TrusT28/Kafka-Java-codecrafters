@@ -32,12 +32,11 @@ public class ClusterMetadataReader {
                 while(true) {
                     Batch batch = new Batch();
                     // TODO make a better check
-                    if(inputStream.read(batch.baseOffset)==-1) {
+                    System.out.println("batch availability : " + inputStream.available());
+                    if(inputStream.available()<=0) {
                         inputStream.close();
                         break;
                     }
-                    int bigInteger = new BigInteger(batch.baseOffset).intValue();
-                    System.out.println("baseOffset is " + batch.baseOffset + " or " + bigInteger);
 
                     inputStream.read(batch.batchLength);
                     inputStream.read(batch.partitionLeaderEpoch);
