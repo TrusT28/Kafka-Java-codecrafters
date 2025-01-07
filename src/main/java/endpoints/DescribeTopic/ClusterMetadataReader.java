@@ -49,6 +49,7 @@ public class ClusterMetadataReader {
                     inputStream.read(batch.baseSequence);
                     inputStream.read(batch.amountOfRecords);
                     if(bytesToInt(batch.amountOfRecords)!=0) {
+                        System.out.println("There are " + bytesToInt(batch.amountOfRecords) + " records");
                         Record[] records = new Record[bytesToInt(batch.amountOfRecords)];
                         for(int i=0; i<records.length; i++) {
                             records[i] = readRecord(inputStream);
@@ -74,6 +75,7 @@ public class ClusterMetadataReader {
         public Record readRecord(InputStream inputStream) throws IOException{
             Record record = new Record();
             inputStream.read(record.recordLength);
+            System.out.println("This record length is "+ record.recordLength);
             inputStream.read(record.attributes);
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
@@ -84,7 +86,8 @@ public class ClusterMetadataReader {
                 record.key = key;
             }
             inputStream.read(record.valueLength);
-            if(record.valueLength[0] != -1){
+            System.out.println("This record value length is "+ record.valueLength);
+            if(record.valueLength[0] != 0){
                 record.value = readValue(inputStream, record.valueLength[0]);
             }
 
