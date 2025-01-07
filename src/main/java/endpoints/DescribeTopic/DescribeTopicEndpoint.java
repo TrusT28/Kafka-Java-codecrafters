@@ -7,20 +7,18 @@ import utils.ErrorCodes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.util.Arrays;
 
 import endpoints.KafkaEndpoint;
+import endpoints.DescribeTopic.models.MetadataBatches;
 import api.RequestBody;
 
 public class DescribeTopicEndpoint implements KafkaEndpoint {;
 
     ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
+    ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
 
     @Override
     public void process(RequestBody requestBody, OutputStream outputStream) throws IOException {
@@ -87,18 +85,31 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
     private byte[] generateTopicsArrayResponse(byte[][] input_topics_names) throws IOException{
         ByteArrayOutputStream topicsArrayBuffer = new ByteArrayOutputStream();
         byte tag_buffer = 0;
+        MetadataBatches metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
         for(int i=0; i<input_topics_names.length; i++) {
-            // Error Code
-            // TODO handle proper error code, instead of unknown topic
-            topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
+             // Find the Topic ID before writting
+            byte[] topicId = new byte[16];
+            topicId = metadataBatches.findTopicId(input_topics_names[i]);
+
+            if (topicId == null) {
+                // Error Code
+                topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
+            }
+            else {
+                topicsArrayBuffer.write(shortToBytes((short) 0));
+            }
             // Topic name
             topicsArrayBuffer.write(input_topics_names[i].length+1);
             topicsArrayBuffer.write(input_topics_names[i]);
             // Topic ID
-            // TODO Handle real topic ID
-            byte[] topicId = new byte[16];
-            Arrays.fill(topicId, (byte) 0);
-            topicsArrayBuffer.write(topicId);
+            if (topicId == null) {
+                byte[] topicIdEmpty= new byte[16];
+                Arrays.fill(topicIdEmpty, (byte) 0);
+                topicsArrayBuffer.write(topicIdEmpty);
+            }
+            else {
+                topicsArrayBuffer.write(topicId);
+            }
             // is Internal topic
             topicsArrayBuffer.write(0);
             // partitions array length
