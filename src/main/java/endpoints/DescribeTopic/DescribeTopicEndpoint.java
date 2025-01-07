@@ -34,10 +34,14 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 byte[] throttle_time_ms = intToBytes(0);
                 responseBuffer.write(throttle_time_ms);
             // Topics Array
+                System.out.println("Request Body body length is now" + requestBody.body.length);
                 ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
+                System.out.println("bodyStream is now" + bodyStream.available());
             // Length of array
-                byte[] input_topics_array_size = new byte[1]; 
+                byte[] input_topics_array_size = new byte[1];
+                System.out.println("Fails now?");
                 bodyStream.read(input_topics_array_size);
+                System.out.println("Fails later?");
                 responseBuffer.write(input_topics_array_size);
             // Topics Array
                 byte[][] input_topics_names = new byte[(input_topics_array_size[0])-1][];
