@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 
 import endpoints.DescribeTopic.models.Batch;
+import endpoints.DescribeTopic.models.DummyValue;
 import endpoints.DescribeTopic.models.FeatureLevelValue;
 import endpoints.DescribeTopic.models.MetadataBatches;
 import endpoints.DescribeTopic.models.PartitionRecordValue;
@@ -24,7 +25,6 @@ public class ClusterMetadataReader {
             System.out.println("Parsing cluster metadata file");
             String fileName = "/tmp/kraft-combined-logs/__cluster_metadata-0/00000000000000000000.log";
             ByteArrayInputStream inputStream = new ByteArrayInputStream(FileUtils.readFileToByteArray(new File(fileName)));
-            System.out.println("metadata logs file input stream is " + inputStream.available());
             MetadataBatches batches = new MetadataBatches();
             try {
                 // Read Record Batches
@@ -85,7 +85,7 @@ public class ClusterMetadataReader {
             }
             inputStream.read(record.valueLength);
             if(record.valueLength[0] != -1){
-                record.value = readValue(inputStream);
+                record.value = readValue(inputStream, record.valueLength[0]);
             }
 
             inputStream.read(record.headersArrayCount);
@@ -97,7 +97,7 @@ public class ClusterMetadataReader {
             return record;
         }
 
-        public Value readValue(InputStream inputStream) throws IOException {
+        public Value readValue(InputStream inputStream, int valueLength) throws IOException {
             byte[] frameVersion = new byte[1];
             inputStream.read(frameVersion);
             byte[] type = new byte[1];
@@ -120,6 +120,11 @@ public class ClusterMetadataReader {
                     break;
                 default:
                     System.out.println("Unkown Value of type " + type[0]);
+                    System.out.println("Will read dummy data of length " + valueLength);
+                    DummyValue dummyValue = new DummyValue();
+                    dummyValue.data = new byte[valueLength];
+                    inputStream.read(dummyValue.data);
+                    value = dummyValue;
                     break;
             }
             value.frameVersion = frameVersion;
