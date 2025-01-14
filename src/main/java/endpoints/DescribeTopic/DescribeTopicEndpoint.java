@@ -131,7 +131,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                     // TODO
                     partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
                     // Array length (+1 size)
-                    topicsArrayBuffer.write(partitions.size()+1);
+                    topicsArrayBuffer.write(encodeVarInt(partitions.size()+1));
                     partitions.forEach(partition -> {
                         try {
                             // Error code
