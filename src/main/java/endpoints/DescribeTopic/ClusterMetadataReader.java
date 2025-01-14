@@ -52,6 +52,7 @@ public class ClusterMetadataReader {
                     inputStream.read(batch.producerEpoch);
                     inputStream.read(batch.baseSequence);
                     inputStream.read(batch.amountOfRecords);
+                    System.out.println("Read amount of records:" + bytesToInt(batch.amountOfRecords));
                     if(bytesToInt(batch.amountOfRecords)>0) {
                         System.out.println("There are " + bytesToInt(batch.amountOfRecords) + " records");
                         Record[] records = new Record[bytesToInt(batch.amountOfRecords)];
@@ -61,6 +62,7 @@ public class ClusterMetadataReader {
                         batch.records = records;
                     }
                     batches.batchesArray.add(batch);
+                    System.out.println("Added batch, now we have " + batches.batchesArray.size());
                 }
                 return batches;
             }
@@ -84,6 +86,7 @@ public class ClusterMetadataReader {
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
             inputStream.read(record.keyLength);
+            System.out.println("Record key length is "+ record.keyLength[0]);
             if(record.keyLength[0] != -1){
                 byte[] key = new byte[record.keyLength[0]];
                 inputStream.read(key);
@@ -112,6 +115,7 @@ public class ClusterMetadataReader {
             byte[] version = new byte[1];
             inputStream.read(version);
             Value value = null;
+            System.out.println("Record value type is "+ type[0]);
             switch (type[0]) {
                 case 12:
                     System.out.println("Value of type feature level");
