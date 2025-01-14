@@ -39,7 +39,7 @@ public class Client implements Runnable {
                     break;
                 }
                 catch (ConstructorException e) {
-                    System.err.println("Error processing client request. Constructor failed to parse input data: " + e.getMessage() + " Hash " +  + this.hashCode();
+                    System.err.println("Error processing client request. Constructor failed to parse input data: " + e.getMessage() + " Hash " +  + this.hashCode());
                     break;
                 }
                 catch (Throwable e) {
