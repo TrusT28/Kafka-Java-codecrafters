@@ -3,6 +3,7 @@ package endpoints.DescribeTopic;
 import static utils.Utils.bytesToInt;
 import static utils.Utils.encodeVarInt;
 import static utils.Utils.intToBytes;
+import static utils.Utils.readUnsignedVarInt;
 import static utils.Utils.shortToBytes;
 import utils.ErrorCodes;
 
@@ -40,11 +41,10 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
             // Topics Array
                 ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
             // Length of array
-                byte[] input_topics_array_size = new byte[1];
-                bodyStream.read(input_topics_array_size);
-                responseBuffer.write(input_topics_array_size);
+                int input_topics_array_size = readUnsignedVarInt(bodyStream);
+                responseBuffer.write(encodeVarInt(input_topics_array_size));
             // Topics Array
-                byte[][] input_topics_names = new byte[(input_topics_array_size[0])-1][];
+                byte[][] input_topics_names = new byte[(input_topics_array_size)-1][];
 
                 for(int i=0; i<input_topics_names.length; i++) {
                     input_topics_names[i] = readTopicName(bodyStream);
