@@ -95,8 +95,10 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
         for(int i=0; i<input_topics_names.length; i++) {
              // Find the Topic ID before writting
             byte[] topicId = new byte[16];
-            topicId = metadataBatches.findTopicId(input_topics_names[i]);
+            System.out.println("Writting response for topic name: " + new String(input_topics_names[i]));
 
+            topicId = metadataBatches.findTopicId(input_topics_names[i]);
+            System.out.println("its topic id is: " + topicId);
             if (topicId == null) {
                 // Error Code
                 topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
@@ -105,7 +107,8 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
             // Topic name
-            topicsArrayBuffer.write(encodeVarIntSigned(input_topics_names[i].length+1));
+            System.out.println("its topic name length is " + (input_topics_names[i].length+1) + " " + encodeVarInt(input_topics_names[i].length+1));
+            topicsArrayBuffer.write(encodeVarInt(input_topics_names[i].length+1));
             topicsArrayBuffer.write(input_topics_names[i]);
             // Topic ID
             if (topicId == null) {
