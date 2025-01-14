@@ -130,35 +130,51 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                     // Array length (+1 size)
                     topicsArrayBuffer.write(partitions.size()+1);
                     partitions.forEach(partition -> {
-                        // Error code
-                        topicsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
-                        // Partition Id
-                        topicsArrayBuffer.write(partition.partitionId);
-                        // Leader Id
-                        topicsArrayBuffer.write(partition.leader);
-                        // Leader Epoch
-                        topicsArrayBuffer.write(partition.leaderEpoch);
-                        // Replica Nodes
-                            // array length
-                            topicsArrayBuffer.write(encodeVarInt(partition.replicaArrayLength));
-                            // replica ids
-                            Arrays.stream(partition.replicaArray).forEach(id -> topicsArrayBuffer.write(id));
-                        // ISR Nodes
-                            // array length
-                            topicsArrayBuffer.write(encodeVarInt(partition.insyncReplicaArrayLength));
-                            // replica ids
-                            Arrays.stream(partition.insyncReplicaArray).forEach(id -> topicsArrayBuffer.write(id));
-                        //TODO how to get these?
-                        // Eligible Leader Replicas
-                        topicsArrayBuffer.write(1);
-                        // Last Known ELR
-                        topicsArrayBuffer.write(1);
-                        // Offline Replicas
-                        topicsArrayBuffer.write(1);
-                        // Tag Buffer
-                        topicsArrayBuffer.write(tag_buffer);
+                        try {
+                            // Error code
+                            topicsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+                            // Partition Id
+                            topicsArrayBuffer.write(partition.partitionId);
+                            // Leader Id
+                            topicsArrayBuffer.write(partition.leader);
+                            // Leader Epoch
+                            topicsArrayBuffer.write(partition.leaderEpoch);
+                            // Replica Nodes
+                                // array length
+                                topicsArrayBuffer.write(encodeVarInt(partition.replicaArrayLength));
+                                // replica ids
+                                Arrays.stream(partition.replicaArray).forEach(id -> {
+                                    try {
+                                        topicsArrayBuffer.write(id);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            // ISR Nodes
+                                // array length
+                                topicsArrayBuffer.write(encodeVarInt(partition.insyncReplicaArrayLength));
+                                // replica ids
+                                Arrays.stream(partition.insyncReplicaArray).forEach(id -> {
+                                    try {
+                                        topicsArrayBuffer.write(id);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            //TODO how to get these?
+                            // Eligible Leader Replicas
+                            topicsArrayBuffer.write(1);
+                            // Last Known ELR
+                            topicsArrayBuffer.write(1);
+                            // Offline Replicas
+                            topicsArrayBuffer.write(1);
+                            // Tag Buffer
+                            topicsArrayBuffer.write(tag_buffer);
+                        } catch (IOException e) {
+                            // Handle the exception, for example, logging it or rethrowing as a runtime exception
+                            e.printStackTrace();
+                        }
                     });
-                    }
                 }
             }
            
