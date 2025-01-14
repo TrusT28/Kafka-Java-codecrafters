@@ -17,7 +17,7 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Got a client!");
+            System.out.println("Got a client!" + this.hashCode());
             API api = new API();
             // Determine the call endpoint and call it
             DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
