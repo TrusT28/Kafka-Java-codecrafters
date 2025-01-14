@@ -29,7 +29,11 @@ public class Client implements Runnable {
                     System.out.println("API Processed!");
                 }
                 catch(EOFException e) {
-                    System.err.println("Client closed connection.");
+                    System.err.println("EOF. Client closed connection." + e.getMessage());
+                    break;
+                }
+                catch(IOException e) {
+                    System.err.println("IO. Client closed connection."  + e.getMessage());
                     break;
                 }
                 catch (ConstructorException e) {
