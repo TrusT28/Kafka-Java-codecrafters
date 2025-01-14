@@ -40,10 +40,10 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 responseBuffer.write(throttle_time_ms);
             // Topics Array
                 ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
-            // Length of array
+                 // Length of array
                 int input_topics_array_size = readUnsignedVarInt(bodyStream);
                 responseBuffer.write(encodeVarInt(input_topics_array_size));
-            // Topics Array
+                 // Topics Array
                 byte[][] input_topics_names = new byte[(input_topics_array_size)-1][];
 
                 for(int i=0; i<input_topics_names.length; i++) {
@@ -77,9 +77,8 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
     }
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
-        byte[] topic_name_length = new byte[1];
-        topic.read(topic_name_length);
-        byte[] topic_name = new byte[(topic_name_length[0])-1];
+        int topic_name_length = readUnsignedVarInt(topic);
+        byte[] topic_name = new byte[(topic_name_length)-1];
         topic.read(topic_name);
         // Tag Buffer
         topic.read();
@@ -105,7 +104,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
             // Topic name
-            topicsArrayBuffer.write(input_topics_names[i].length+1);
+            topicsArrayBuffer.write(encodeVarInt(input_topics_names[i].length+1));
             topicsArrayBuffer.write(input_topics_names[i]);
             // Topic ID
             if (topicId == null) {
