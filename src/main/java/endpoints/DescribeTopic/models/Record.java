@@ -7,11 +7,10 @@ public class Record {
         public byte[] timestampData = new byte[1];
          // TODO varint
         public byte[] offsetDelta = new byte[1];
-         // TODO varint
-        public byte[] keyLength = new byte[1];
+        public int keyLength;
         public byte[] key = null;
-        public byte[] valueLength = new byte[1];
+        public int valueLength;
         public Value value = null;
-        public byte[] headersArrayCount = new byte[1];
+        public int headersArrayCount;
         public byte[] headersArray = null;
 }
