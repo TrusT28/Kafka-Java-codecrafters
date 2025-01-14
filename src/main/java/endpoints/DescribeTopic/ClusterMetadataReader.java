@@ -1,6 +1,8 @@
 package endpoints.DescribeTopic;
 
 import static utils.Utils.bytesToInt;
+import static utils.Utils.readSignedVarInt;
+import static utils.Utils.readUnsignedVarInt;
 
 import java.beans.FeatureDescriptor;
 import java.io.ByteArrayInputStream;
@@ -84,29 +86,31 @@ public class ClusterMetadataReader {
 
         public Record readRecord(InputStream inputStream) throws IOException{
             Record record = new Record();
-            inputStream.read(record.recordLength);
-            System.out.println("This record length is "+ record.recordLength[0]);
+
+            record.recordLength = readSignedVarInt(inputStream);
+            System.out.println("This record length is " + record.recordLength);
+
             inputStream.read(record.attributes);
             inputStream.read(record.timestampData);
             inputStream.read(record.offsetDelta);
-            inputStream.read(record.keyLength);
-            System.out.println("Record key length is "+ record.keyLength[0]);
-            // KeyLength 0x01 is special value indicating -1 or null.
-            if(record.keyLength[0] != 1){
-                byte[] key = new byte[record.keyLength[0]];
+
+            record.keyLength = readSignedVarInt(inputStream);
+            System.out.println("This keyLength is " + record.keyLength);
+            if(record.keyLength != -1 || record.keyLength > 0){
+                byte[] key = new byte[record.keyLength];
                 inputStream.read(key);
                 record.key = key;
             }
-            inputStream.read(record.valueLength);
-            System.out.println("This record value length is "+ record.valueLength[0]);
-            if(record.valueLength[0] != -1 || record.valueLength[0] != 0 ){
-                record.value = readValue(inputStream, record.valueLength[0]);
+            record.valueLength = readSignedVarInt(inputStream);
+            System.out.println("This valueLength is " + record.valueLength);
+            if(record.valueLength != -1 || record.valueLength > 0 ){
+                record.value = readValue(inputStream, record.valueLength);
             }
 
-            inputStream.read(record.headersArrayCount);
-            System.out.println("This headersArrayCount is "+ record.headersArrayCount[0]);
-            if(record.headersArrayCount[0] > 0){
-                for(int i=0; i<record.headersArrayCount[0]; i++) {
+            record.headersArrayCount = readUnsignedVarInt(inputStream);
+            System.out.println("This headersArrayCount is " + record.headersArrayCount);
+            if(record.headersArrayCount > 0){
+                for(int i=0; i<record.headersArrayCount; i++) {
                     // TODO parse headers
                 }
             }
