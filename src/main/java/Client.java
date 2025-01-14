@@ -50,7 +50,7 @@ public class Client implements Runnable {
         } finally {
             try {
                 if (clientSocket != null && !clientSocket.isClosed()) {
-                    System.out.println("Closing the client!");
+                    System.out.println("Closing the client! " + this.hashCode());
                     clientSocket.close();
                 }
             } catch (IOException e) {
