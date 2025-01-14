@@ -91,19 +91,21 @@ public class ClusterMetadataReader {
             inputStream.read(record.offsetDelta);
             inputStream.read(record.keyLength);
             System.out.println("Record key length is "+ record.keyLength[0]);
-            if(record.keyLength[0] != -1){
+            // KeyLength 0x01 is special value indicating -1 or null.
+            if(record.keyLength[0] != 1){
                 byte[] key = new byte[record.keyLength[0]];
                 inputStream.read(key);
                 record.key = key;
             }
             inputStream.read(record.valueLength);
             System.out.println("This record value length is "+ record.valueLength[0]);
-            if(record.valueLength[0] != 0){
+            if(record.valueLength[0] != -1 || record.valueLength[0] != 0 ){
                 record.value = readValue(inputStream, record.valueLength[0]);
             }
 
             inputStream.read(record.headersArrayCount);
-            if(record.headersArrayCount[0] != 0){
+            System.out.println("This headersArrayCount is "+ record.headersArrayCount[0]);
+            if(record.headersArrayCount[0] > 0){
                 for(int i=0; i<record.headersArrayCount[0]; i++) {
                     // TODO parse headers
                 }
@@ -112,6 +114,7 @@ public class ClusterMetadataReader {
         }
 
         public Value readValue(InputStream inputStream, int valueLength) throws IOException {
+            System.out.println("Reading value");
             byte[] frameVersion = new byte[1];
             inputStream.read(frameVersion);
             byte[] type = new byte[1];
