@@ -19,7 +19,6 @@ public class RequestBody {
         public RequestBody(DataInputStream dataInputStream) throws ConstructorException, EOFException{
             try {
                 dataInputStream.readFully(input_message_size);
-                System.out.println("message size is " + bytesToInt(input_message_size));
                 dataInputStream.readFully(input_request_api_key);
                 dataInputStream.readFully(input_request_api_version);
                 dataInputStream.readFully(input_correlation_id);
@@ -31,12 +30,11 @@ public class RequestBody {
                 // Tag Buffer
                 dataInputStream.read();
                 int requestHeaderSize = input_request_api_key.length + input_request_api_version.length + input_correlation_id.length + input_client_id_length.length + input_client_id.length + 1;
-                System.out.println("headers size is " + requestHeaderSize);
                 body = new byte[bytesToInt(input_message_size) - requestHeaderSize];
-                System.out.println("RequestBody body legnth is " + body.length);
                 dataInputStream.readFully(body);
             }
             catch(java.io.EOFException e) {
+                System.out.println("Unexpected EOF when reading Request Body");
                 throw e;
             }
             catch(IOException e) {

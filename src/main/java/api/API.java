@@ -2,6 +2,7 @@ package api;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -18,11 +19,11 @@ public class API {
     private ApiMetadata[] SUPPORTED_APIs = {new ApiMetadata(API_VERSIONS_KEY, 0,4), new ApiMetadata(DESCRIBE_TOPIC_KEY,0,0)};
     ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
 
+    // TODO make sure input stream is handled well, output stream too. No IO or EOF. readFully causes this.
     public void processAPI(DataInputStream dataInputStream, OutputStream outputStream) throws ConstructorException, IOException {
         // Receive data from client and parse
         responseBuffer.reset();
         RequestBody requestBody = new RequestBody(dataInputStream);
-        System.out.println("Body length is " + requestBody.body.length);
         switch (bytesToInt(requestBody.input_request_api_key)) {
             case API_VERSIONS_KEY:
                 System.out.println("ApiVersions request");
@@ -31,8 +32,17 @@ public class API {
                 break;
             case DESCRIBE_TOPIC_KEY:
                 System.out.println("DescribeTopic request");
+                try{
                 DescribeTopicEndpoint describeTopicEndpoint = new DescribeTopicEndpoint();
                 describeTopicEndpoint.process(requestBody, outputStream);
+                } catch(EOFException e) {
+                    System.out.println("EOFException in api" + e.getMessage());
+                    throw e;
+                }
+                catch(IOException e) {
+                    System.out.println("IOException in api" + e.getMessage());
+                    throw e;
+                }
                 break;
             default:
                 break;
