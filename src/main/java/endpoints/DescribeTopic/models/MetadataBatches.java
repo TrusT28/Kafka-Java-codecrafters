@@ -1,6 +1,7 @@
 package endpoints.DescribeTopic.models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +79,7 @@ public class MetadataBatches {
             System.out.println("Value is of PartitionRecordValue type. Checking topic id match");
             PartitionRecordValue partitionRecordValue = (PartitionRecordValue) value;
             System.out.println("Its topic id is: " + new String(partitionRecordValue.topicUUID));
-            if (partitionRecordValue.topicUUID == topicId) {
+            if (Arrays.equals(partitionRecordValue.topicUUID,topicId)) {
                 System.out.println("Topic ids match!");
                 return partitionRecordValue;
             }
