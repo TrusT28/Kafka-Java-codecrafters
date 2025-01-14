@@ -42,6 +42,7 @@ public class ClusterMetadataReader {
                         break;
                     }
                     System.out.println("Continuing loop");
+                    inputStream.read(batch.baseOffset);
                     inputStream.read(batch.batchLength);
                     inputStream.read(batch.partitionLeaderEpoch);
                     inputStream.read(batch.magicByte);
