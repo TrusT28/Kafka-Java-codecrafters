@@ -107,8 +107,8 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
             // Topic name
-            System.out.println("its topic name length is " + (input_topics_names[i].length+1) + " " + encodeVarInt(input_topics_names[i].length+1));
-            topicsArrayBuffer.write(encodeVarInt(input_topics_names[i].length+1));
+            int nameLength = input_topics_names[i].length+1;
+            topicsArrayBuffer.write(encodeVarInt(nameLength));
             topicsArrayBuffer.write(input_topics_names[i]);
             // Topic ID
             if (topicId == null) {
