@@ -152,11 +152,13 @@ public class ClusterMetadataReader {
         }
 
         private PartitionRecordValue readPartitionRecordValue(InputStream inputStream) throws IOException {
+            System.out.println("Reading Partition Record Value");
             PartitionRecordValue partitionRecordValue = new PartitionRecordValue();
             inputStream.read(partitionRecordValue.partitionId);
             inputStream.read(partitionRecordValue.topicUUID);
 
             inputStream.read(partitionRecordValue.replicaArrayLength);
+            System.out.println("replicaArrayLength size " + partitionRecordValue.replicaArrayLength[0]);
             if(partitionRecordValue.replicaArrayLength[0] != 0){
                 byte[][] replicaArray = new byte[partitionRecordValue.replicaArrayLength[0]-1][4];
                 for(int i=0; i<replicaArray.length; i++) {
@@ -164,8 +166,9 @@ public class ClusterMetadataReader {
                 }
                 partitionRecordValue.replicaArray = replicaArray;
             }
-
+            
             inputStream.read(partitionRecordValue.insyncReplicaArrayLength);
+            System.out.println("insyncReplicaArrayLength size " + partitionRecordValue.insyncReplicaArrayLength[0]);
             if(partitionRecordValue.insyncReplicaArrayLength[0] != 0){
                 byte[][] insyncReplicaArray = new byte[partitionRecordValue.insyncReplicaArrayLength[0]-1][4];
                 for(int i=0; i<insyncReplicaArray.length; i++) {
@@ -175,6 +178,7 @@ public class ClusterMetadataReader {
             }
 
             inputStream.read(partitionRecordValue.removingReplicaArrayLength);
+            System.out.println("removingReplicaArrayLength size " + partitionRecordValue.removingReplicaArrayLength[0]);
             if(partitionRecordValue.removingReplicaArrayLength[0] != 0){
                 //TODO make sure removing replica has 4 bytes
                 byte[][] removingReplicaArray = new byte[partitionRecordValue.removingReplicaArrayLength[0]-1][4];
@@ -185,6 +189,7 @@ public class ClusterMetadataReader {
             }
 
             inputStream.read(partitionRecordValue.addingReplicaArrayLength);
+            System.out.println("addingReplicaArrayLength size " + partitionRecordValue.addingReplicaArrayLength[0]);
             if(partitionRecordValue.addingReplicaArrayLength[0] != 0){
                 //TODO make sure adding replica has 4 bytes
                 byte[][] addingReplicaArray = new byte[partitionRecordValue.addingReplicaArrayLength[0]-1][4];
@@ -199,6 +204,7 @@ public class ClusterMetadataReader {
             inputStream.read(partitionRecordValue.partitionEpoch);
            
             inputStream.read(partitionRecordValue.directoriesArrayLength);
+            System.out.println("directoriesArrayLength size " + partitionRecordValue.directoriesArrayLength[0]);
             if(partitionRecordValue.directoriesArrayLength[0] != 0){
                 byte[][] directoriesArray = new byte[partitionRecordValue.directoriesArrayLength[0]-1][16];
                 for(int i=0; i<directoriesArray.length; i++) {
@@ -208,6 +214,7 @@ public class ClusterMetadataReader {
             }
 
             inputStream.read(partitionRecordValue.taggedFieldsCount);
+            System.out.println("taggedFieldsCount size " + partitionRecordValue.taggedFieldsCount[0]);
             if(partitionRecordValue.taggedFieldsCount[0] != 0){
                 // TODO parse taggedFields
                byte[] taggedFields = new byte[partitionRecordValue.taggedFieldsCount[0]];
@@ -219,6 +226,7 @@ public class ClusterMetadataReader {
         }
 
         private TopicRecordValue readTopicRecordValue(InputStream inputStream) throws IOException {
+            System.out.println("Reading topic record value");
             TopicRecordValue topicRecordValue = new TopicRecordValue();
             inputStream.read(topicRecordValue.nameLength);
             if(topicRecordValue.nameLength[0] != 0){
@@ -228,6 +236,7 @@ public class ClusterMetadataReader {
             }
             inputStream.read(topicRecordValue.topicUUID);
             inputStream.read(topicRecordValue.taggedFieldsCount);
+            System.out.println("taggedFieldsCount :" + topicRecordValue.taggedFieldsCount[0]);
             if(topicRecordValue.taggedFieldsCount[0] != 0){
                 // TODO parse taggedFields
                byte[] taggedFields = new byte[topicRecordValue.taggedFieldsCount[0]];
@@ -238,6 +247,7 @@ public class ClusterMetadataReader {
         }
 
         private FeatureLevelValue readFeatureLevelValue(InputStream inputStream) throws IOException {
+            System.out.println("Reading feature level value");
             FeatureLevelValue featureLevelValue = new FeatureLevelValue();
             inputStream.read(featureLevelValue.nameLength);
             if(featureLevelValue.nameLength[0] != 0){
@@ -247,6 +257,7 @@ public class ClusterMetadataReader {
             }
             inputStream.read(featureLevelValue.featureLevel);
             inputStream.read(featureLevelValue.taggedFieldsCount);
+            System.out.println("taggedFieldsCount :" + featureLevelValue.taggedFieldsCount[0]);
             if(featureLevelValue.taggedFieldsCount[0] != 0){
                  // TODO parse taggedFields
                 byte[] taggedFields = new byte[featureLevelValue.taggedFieldsCount[0]];
