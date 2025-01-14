@@ -33,7 +33,7 @@ public class MetadataBatches {
             System.out.println("Value is of TopicRecord type. Checking topic name match");
             TopicRecordValue topicRecordValue = (TopicRecordValue) value;
             System.out.println("Its topic name is: " + new String(topicRecordValue.topicName));
-            if (new String(topicRecordValue.topicName) == new String(topicName)) {
+            if (new String(topicRecordValue.topicName).equals(new String(topicName))) {
                 System.out.println("Topic name matches!");
                 return topicRecordValue.topicUUID;
             }
