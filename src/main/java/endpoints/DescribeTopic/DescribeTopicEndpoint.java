@@ -83,9 +83,11 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
     }
 
     private byte[] generateTopicsArrayResponse(byte[][] input_topics_names) throws IOException{
+        System.out.println("Reading metadata kafka file");
         ByteArrayOutputStream topicsArrayBuffer = new ByteArrayOutputStream();
         byte tag_buffer = 0;
         MetadataBatches metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
+        System.out.println("Done reading metadata kafka file. batches:"+metadataBatches.batchesArray.size());
         for(int i=0; i<input_topics_names.length; i++) {
              // Find the Topic ID before writting
             byte[] topicId = new byte[16];

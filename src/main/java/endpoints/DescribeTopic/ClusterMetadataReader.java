@@ -25,7 +25,10 @@ public class ClusterMetadataReader {
         public MetadataBatches parseClusterMetadataFile() throws IOException {
             System.out.println("Parsing cluster metadata file");
             String fileName = "/tmp/kraft-combined-logs/__cluster_metadata-0/00000000000000000000.log";
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(FileUtils.readFileToByteArray(new File(fileName)));
+            File file = new File(fileName);
+            System.out.println("File exists? " + file.exists());
+            System.out.println("File total length: " + file.length());
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(FileUtils.readFileToByteArray(file));
             MetadataBatches batches = new MetadataBatches();
             try {
                 // Read Record Batches
@@ -38,7 +41,7 @@ public class ClusterMetadataReader {
                         inputStream.close();
                         break;
                     }
-
+                    System.out.println("Continuing loop");
                     inputStream.read(batch.batchLength);
                     inputStream.read(batch.partitionLeaderEpoch);
                     inputStream.read(batch.magicByte);
