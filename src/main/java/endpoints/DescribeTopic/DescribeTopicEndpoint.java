@@ -21,7 +21,7 @@ import endpoints.DescribeTopic.models.MetadataBatches;
 import endpoints.DescribeTopic.models.PartitionRecordValue;
 import api.RequestBody;
 
-public class DescribeTopicEndpoint implements KafkaEndpoint {;
+public class DescribeTopicEndpoint implements KafkaEndpoint {
 
     ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
     ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
@@ -73,6 +73,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
         }
         byte[] responseBytes = responseBuffer.toByteArray();
         // send data to client
+        System.out.println("Finishing. Writting to output stream for describe Topic endpoint");
         outputStream.write(intToBytes(responseBytes.length));
         outputStream.write(responseBytes);
         outputStream.flush();
