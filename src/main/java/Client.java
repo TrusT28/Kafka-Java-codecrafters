@@ -18,31 +18,32 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Got a client!" + this.hashCode());
+            System.out.println("Got a client! " + this.hashCode());
             API api = new API();
             // Determine the call endpoint and call it
             DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
             OutputStream outputStream = clientSocket.getOutputStream();
             while (true) {
                 try {
-                    System.out.println("API in progress!");
+                    System.out.println("API in progress! " + this.hashCode());
                     api.processAPI(dataInputStream, outputStream);
-                    System.out.println("API Processed!");
+                    System.out.println("API Processed! " + this.hashCode());
+                    break;
                 }
                 catch(EOFException e) {
-                    System.err.println("EOF. Client closed connection." + e.getMessage());
+                    System.err.println("EOF. Client closed connection." + e.getMessage() + " Hash " +  + this.hashCode());
                     break;
                 }
                 catch(IOException e) {
-                    System.err.println("IO. Client closed connection."  + e.getMessage());
+                    System.err.println("IO. Client closed connection."  + e.getMessage() + " Hash " +  + this.hashCode());
                     break;
                 }
                 catch (ConstructorException e) {
-                    System.err.println("Error processing client request. Constructor failed to parse input data: " + e.getMessage());
+                    System.err.println("Error processing client request. Constructor failed to parse input data: " + e.getMessage() + " Hash " +  + this.hashCode();
                     break;
                 }
                 catch (Throwable e) {
-                    System.out.println("Something went wrong: " + e.getMessage());
+                    System.out.println("Something went wrong: " + e.getMessage() + " Hash " +  + this.hashCode());
                     break;
                 }
             }
