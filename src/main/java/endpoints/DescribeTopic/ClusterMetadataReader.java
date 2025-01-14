@@ -31,9 +31,10 @@ public class ClusterMetadataReader {
                 // Read Record Batches
                 while(true) {
                     Batch batch = new Batch();
-                    // TODO make a better check
+                    // TODO Fix this check
                     System.out.println("batch availability : " + inputStream.available());
                     if(inputStream.available()<=0) {
+                        System.out.println("Closing loop");
                         inputStream.close();
                         break;
                     }
