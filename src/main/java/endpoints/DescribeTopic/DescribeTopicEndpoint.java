@@ -44,8 +44,9 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                  // Length of array
                 int input_topics_array_size = readUnsignedVarInt(bodyStream);
                 responseBuffer.write(encodeVarInt(input_topics_array_size));
+                System.out.println("Input topics size " + input_topics_array_size);
                  // Topics Array
-                byte[][] input_topics_names = new byte[(input_topics_array_size)-1][];
+                byte[][] input_topics_names = new byte[input_topics_array_size-1][];
 
                 for(int i=0; i<input_topics_names.length; i++) {
                     input_topics_names[i] = readTopicName(bodyStream);
@@ -79,7 +80,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
         int topic_name_length = readUnsignedVarInt(topic);
-        byte[] topic_name = new byte[(topic_name_length)-1];
+        byte[] topic_name = new byte[topic_name_length-1];
         topic.read(topic_name);
         // Tag Buffer
         topic.read();
@@ -92,6 +93,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
         byte tag_buffer = 0;
         MetadataBatches metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
         System.out.println("Done reading metadata kafka file. batches:"+metadataBatches.batchesArray.size());
+        System.out.println("Total size of input topics names is " + input_topics_names.length);
         for(int i=0; i<input_topics_names.length; i++) {
              // Find the Topic ID before writting
             byte[] topicId = new byte[16];
