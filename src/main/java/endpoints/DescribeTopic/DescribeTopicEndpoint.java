@@ -2,6 +2,7 @@ package endpoints.DescribeTopic;
 
 import static utils.Utils.bytesToInt;
 import static utils.Utils.encodeVarInt;
+import static utils.Utils.encodeVarIntSigned;
 import static utils.Utils.intToBytes;
 import static utils.Utils.readUnsignedVarInt;
 import static utils.Utils.shortToBytes;
@@ -104,7 +105,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
             // Topic name
-            topicsArrayBuffer.write(encodeVarInt(input_topics_names[i].length+1));
+            topicsArrayBuffer.write(encodeVarIntSigned(input_topics_names[i].length+1));
             topicsArrayBuffer.write(input_topics_names[i]);
             // Topic ID
             if (topicId == null) {
