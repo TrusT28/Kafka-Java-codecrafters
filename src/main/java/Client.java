@@ -11,6 +11,7 @@ public class Client implements Runnable {
     private final Socket clientSocket;
 
     public Client(Socket clientSocket) {
+        System.out.println("Creating new Client!" + this.hashCode());
         this.clientSocket = clientSocket;
     }
 
