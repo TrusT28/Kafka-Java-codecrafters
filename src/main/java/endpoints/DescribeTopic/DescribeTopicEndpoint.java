@@ -28,6 +28,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
 
     @Override
     public void process(RequestBody requestBody, OutputStream outputStream) throws IOException {
+        System.out.println("outputStream inside describeTopicEndpoint is " + outputStream.hashCode());
         responseBuffer.reset();
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
