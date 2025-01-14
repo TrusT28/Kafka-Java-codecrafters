@@ -3,6 +3,8 @@ package utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Utils {
     public static int bytesToInt(byte[] bytes) {
@@ -63,4 +65,34 @@ public class Utils {
       // Apply ZigZag decoding to interpret signed integers.
       return (value >>> 1) ^ -(value & 1);
   }
+
+
+  // Method to encode a signed int as a variable-length integer (VarInt) with Zigzag encoding
+    public static byte[] encodeVarIntSigned(int value) {
+        // Apply Zigzag encoding to convert signed int to unsigned
+        long zigzagValue = (value << 1) ^ (value >> 31); // Zigzag formula
+        
+        return encodeVarInt(zigzagValue); // Encode the resulting unsigned value
+    }
+
+    // Method to encode an unsigned long as a variable-length integer (VarInt)
+    public static byte[] encodeVarInt(long value) {
+        List<Byte> byteList = new ArrayList<>();
+        
+        // While there's still data to encode
+        while ((value & ~0x7F) != 0) {
+            byteList.add((byte) ((value & 0x7F) | 0x80));  // Set the continuation bit
+            value >>>= 7; // Unsigned right shift by 7 bits
+        }
+        
+        byteList.add((byte) (value & 0x7F));  // Final byte, no continuation bit
+        
+        // Convert the list of bytes to an array
+        byte[] byteArray = new byte[byteList.size()];
+        for (int i = 0; i < byteList.size(); i++) {
+            byteArray[i] = byteList.get(i);
+        }
+        
+        return byteArray;
+    }
 }

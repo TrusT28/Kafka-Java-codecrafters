@@ -1,6 +1,7 @@
 package endpoints.DescribeTopic;
 
 import static utils.Utils.bytesToInt;
+import static utils.Utils.encodeVarInt;
 import static utils.Utils.intToBytes;
 import static utils.Utils.shortToBytes;
 import utils.ErrorCodes;
@@ -9,10 +10,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import endpoints.KafkaEndpoint;
 import endpoints.DescribeTopic.models.MetadataBatches;
+import endpoints.DescribeTopic.models.PartitionRecordValue;
 import api.RequestBody;
 
 public class DescribeTopicEndpoint implements KafkaEndpoint {;
@@ -115,8 +119,49 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {;
             // is Internal topic
             topicsArrayBuffer.write(0);
             // partitions array length
-            // TODO handle partitions
-            topicsArrayBuffer.write(1);
+            if (topicId == null) {
+                topicsArrayBuffer.write(1);
+            }
+            else {
+                ArrayList<PartitionRecordValue> partitions = metadataBatches.findPartitions(topicId);
+                if(partitions!= null && partitions.size()>0) {
+                    // TODO
+                    partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
+                    // Array length (+1 size)
+                    topicsArrayBuffer.write(partitions.size()+1);
+                    partitions.forEach(partition -> {
+                        // Error code
+                        topicsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+                        // Partition Id
+                        topicsArrayBuffer.write(partition.partitionId);
+                        // Leader Id
+                        topicsArrayBuffer.write(partition.leader);
+                        // Leader Epoch
+                        topicsArrayBuffer.write(partition.leaderEpoch);
+                        // Replica Nodes
+                            // array length
+                            topicsArrayBuffer.write(encodeVarInt(partition.replicaArrayLength));
+                            // replica ids
+                            Arrays.stream(partition.replicaArray).forEach(id -> topicsArrayBuffer.write(id));
+                        // ISR Nodes
+                            // array length
+                            topicsArrayBuffer.write(encodeVarInt(partition.insyncReplicaArrayLength));
+                            // replica ids
+                            Arrays.stream(partition.insyncReplicaArray).forEach(id -> topicsArrayBuffer.write(id));
+                        //TODO how to get these?
+                        // Eligible Leader Replicas
+                        topicsArrayBuffer.write(1);
+                        // Last Known ELR
+                        topicsArrayBuffer.write(1);
+                        // Offline Replicas
+                        topicsArrayBuffer.write(1);
+                        // Tag Buffer
+                        topicsArrayBuffer.write(tag_buffer);
+                    });
+                    }
+                }
+            }
+           
             //Topic Authorized Operations
             // TODO handle it properly, instead of hardcoded value
             byte[] authorizedOperations = {0,0,0,0,1,1,0,1,1,1,1,1,1,0,0,0};

@@ -45,4 +45,49 @@ public class MetadataBatches {
         else return null;
     }
 
+
+    
+    // TODO maybe relation of records within a batch is important. If I found topic record value, I can find based on that record other data?
+    public ArrayList<PartitionRecordValue> findPartitions(byte[] topicId) {
+        System.out.println("Searching partitions for topic ID " + new String(topicId));
+        if(batchesArray.size() > 0) {
+            List<Batch> filteredBatches = batchesArray.stream().filter(batch -> !batch.isEmptyRecords()).collect(Collectors.toList());
+            System.out.println("filteredBatches size: " + filteredBatches.size());
+            if (!filteredBatches.isEmpty()) {
+                ArrayList<PartitionRecordValue> partitions = new ArrayList<>();
+                for(int i=0; i<filteredBatches.size(); i++) {
+                    Record[] records = filteredBatches.get(i).records;
+                    System.out.println("This batch has records: " + records.length);
+                    for(int j=0; j<records.length; j++){
+                        PartitionRecordValue result = findPartitions(records[j].value, topicId);
+                        if(result != null) {
+                            partitions.add(result);
+                        }
+                    }
+                }
+                if (partitions.size()>0) {
+                    return partitions;
+                }
+            }
+        }
+        return null;
+    }
+
+    private PartitionRecordValue findPartitions(Value value, byte[] topicId) {
+        if(value.getClass()==PartitionRecordValue.class) {
+            System.out.println("Value is of PartitionRecordValue type. Checking topic id match");
+            PartitionRecordValue partitionRecordValue = (PartitionRecordValue) value;
+            System.out.println("Its topic id is: " + new String(partitionRecordValue.topicUUID));
+            if (partitionRecordValue.topicUUID == topicId) {
+                System.out.println("Topic ids match!");
+                return partitionRecordValue;
+            }
+            else {
+                System.out.println("Topic id does not match.");
+                return null;
+            }
+        }
+        else return null;
+    }
+
 }
