@@ -23,13 +23,12 @@ import api.RequestBody;
 
 public class DescribeTopicEndpoint implements KafkaEndpoint {
 
-    ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
     ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
 
     @Override
     public void process(RequestBody requestBody, OutputStream outputStream) throws IOException {
         System.out.println("outputStream inside describeTopicEndpoint is " + outputStream.hashCode());
-        responseBuffer.reset();
+        ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
             System.out.println("Handling a proper request");
