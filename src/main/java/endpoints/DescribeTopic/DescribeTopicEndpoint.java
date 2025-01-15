@@ -115,6 +115,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         Arrays.stream(input_topics_names).forEach(name -> System.out.println(new String(name)));
         // Find the Topic ID before writting
         Map<byte[],byte[]> topicNameIdMap = metadataBatches.findTopicId(input_topics_names);
+        System.out.println("map is " + topicNameIdMap.toString());
         if (topicNameIdMap == null) {
             System.out.println("topic names-ids map is null");
             throw new ClusterMetadataException("topic names-ids map is null");
