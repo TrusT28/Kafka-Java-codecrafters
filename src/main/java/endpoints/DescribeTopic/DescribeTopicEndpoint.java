@@ -81,11 +81,15 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
         int topic_name_length = readUnsignedVarInt(topic);
-        byte[] topic_name = new byte[topic_name_length-1];
-        topic.read(topic_name);
-        // Tag Buffer
-        topic.read();
-        return topic_name;
+        System.out.println("Length of topic name is " + topic_name_length);
+        if(topic_name_length > 1) {
+            byte[] topic_name = new byte[topic_name_length-1];
+            topic.read(topic_name);
+            // Tag Buffer
+            topic.read();
+            return topic_name;
+        }
+        else return null;
     }
 
     private byte[] generateTopicsArrayResponse(byte[][] input_topics_names) throws IOException{
