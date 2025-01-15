@@ -58,7 +58,9 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                 bodyStream.read(input_pagination_tag);
                 // Tag Buffer
                 bodyStream.read();
-                responseBuffer.write(generateTopicsArrayResponse(input_topics_names));
+                byte[] topicsArray = generateTopicsArrayResponse(input_topics_names);
+                System.out.println("Topics Array is done. Size " + topicsArray.length);
+                responseBuffer.write(topicsArray);
             // Next Cursor
                 responseBuffer.write(255);
             // Tag Buffer
