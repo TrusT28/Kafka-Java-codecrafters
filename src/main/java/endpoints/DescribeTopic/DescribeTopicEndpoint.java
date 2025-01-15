@@ -125,21 +125,19 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             System.out.println("Writting response for topic name: " + new String(topicName));
 
             topicId = topicNameIdMap.get(topicName);
-            
             if (topicId == null) {
+                System.out.println("topicID is null");
                 // Error Code
                 topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
             }
             else {
+                System.out.println("topicID exists");
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
 
             // Topic name
             int nameLength = topicName.length+1;
-            System.out.println("Topic name length is " + nameLength);
             byte[] nameLengthEncoded = encodeVarInt(nameLength);
-            System.out.println("Topic name length after encoding is of length" + nameLengthEncoded.length);
-            System.out.println("Topic name length after encoding is " + readUnsignedVarInt(nameLengthEncoded));
             topicsArrayBuffer.write(nameLengthEncoded);
             topicsArrayBuffer.write(topicName);
             // Topic ID
@@ -151,6 +149,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             else {
                 topicsArrayBuffer.write(topicId);
             }
+
             // is Internal topic
             topicsArrayBuffer.write(0);
 
@@ -213,7 +212,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                     });
                 } else {
                     System.out.println("Partitions is empty!");
-                    topicsArrayBuffer.write(encodeVarInt(1));
+                    topicsArrayBuffer.write(1);
                 }
             }
            
