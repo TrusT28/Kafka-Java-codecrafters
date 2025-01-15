@@ -159,9 +159,14 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             }
             else {
                 ArrayList<PartitionRecordValue> partitions = metadataBatches.findPartitions(topicId);
-                if(partitions!= null && partitions.size()>0) {
-                    // TODO
+                if(partitions == null) {
+                    System.out.println("No partitions found");
+                    topicsArrayBuffer.write(1);
+                }
+                else {
+                    System.out.println("Found partitions " + partitions.size());
                     partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
+                    System.out.println("after soring " + partitions.size());
                     // Array length (+1 size)
                     topicsArrayBuffer.write(encodeVarInt(partitions.size()+1));
                     partitions.forEach(partition -> {
@@ -182,6 +187,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                                     try {
                                         topicsArrayBuffer.write(id);
                                     } catch (IOException e) {
+                                        System.out.println("failed to write replica array");
                                         e.printStackTrace();
                                     }
                                 });
@@ -210,9 +216,6 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                             e.printStackTrace();
                         }
                     });
-                } else {
-                    System.out.println("Partitions is empty!");
-                    topicsArrayBuffer.write(1);
                 }
             }
            
