@@ -14,7 +14,6 @@ import api.RequestBody;
 import endpoints.KafkaEndpoint;
 
 public class ApiVersionsEndpoint implements KafkaEndpoint{
-    ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
     private ApiMetadata[] SUPPORTED_APIs = null;
 
     public ApiVersionsEndpoint(ApiMetadata[] SUPPORTED_APIs) {
@@ -22,7 +21,7 @@ public class ApiVersionsEndpoint implements KafkaEndpoint{
     }
 
     @Override
-    public void process(RequestBody requestBody, ByteArrayOutputStream outputStream) throws IOException {
+    public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException {
             // Only support 0-4 versions
             if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 4) {
                 System.out.println("Handling a proper request");

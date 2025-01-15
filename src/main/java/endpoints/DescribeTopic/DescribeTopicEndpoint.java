@@ -2,7 +2,6 @@ package endpoints.DescribeTopic;
 
 import static utils.Utils.bytesToInt;
 import static utils.Utils.encodeVarInt;
-import static utils.Utils.encodeVarIntSigned;
 import static utils.Utils.intToBytes;
 import static utils.Utils.readUnsignedVarInt;
 import static utils.Utils.shortToBytes;
@@ -13,7 +12,6 @@ import utils.ErrorCodes;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -29,9 +27,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
     ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
 
     @Override
-    public void process(RequestBody requestBody, ByteArrayOutputStream outputStream) throws IOException {
-        System.out.println("outputStream inside describeTopicEndpoint is " + outputStream.hashCode());
-        ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
+    public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException {
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
             try {
