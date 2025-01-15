@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 public class MetadataBatches {
     public List<Batch> batchesArray = new ArrayList<>();
 
-    public Map<byte[],byte[]> findTopicId(byte[][] topicNames) {
+    public Map<String,byte[]> findTopicId(byte[][] topicNames) {
         if(batchesArray.size() > 0) {
-            Map<byte[],byte[]> topicNameIdMap = new HashMap<>();
+            Map<String,byte[]> topicNameIdMap = new HashMap<>();
             for(Batch batch: batchesArray) {
                 System.out.println("This batch has records: " + batch.records.length);
                 for(Record record: batch.records){
@@ -24,7 +24,7 @@ public class MetadataBatches {
                         TopicRecordValue topicRecordValue = (TopicRecordValue) record.value;
                         Optional<byte[]> match = Arrays.stream(topicNames).filter(name -> Arrays.equals(name, topicRecordValue.topicName)).findFirst();
                         if(match.isPresent()) {
-                            topicNameIdMap.put(topicRecordValue.topicName, topicRecordValue.topicUUID);
+                            topicNameIdMap.put(new String(topicRecordValue.topicName), topicRecordValue.topicUUID);
                             System.out.println("Found a match for " + new String(topicRecordValue.topicName));
                         }
                         else {
