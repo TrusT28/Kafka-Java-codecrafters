@@ -6,6 +6,8 @@ import static utils.Utils.encodeVarIntSigned;
 import static utils.Utils.intToBytes;
 import static utils.Utils.readUnsignedVarInt;
 import static utils.Utils.shortToBytes;
+
+import utils.ClusterMetadataException;
 import utils.ErrorCodes;
 
 import java.io.ByteArrayInputStream;
@@ -15,6 +17,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
 
 import endpoints.KafkaEndpoint;
 import endpoints.DescribeTopic.models.MetadataBatches;
@@ -26,45 +29,54 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
     ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
 
     @Override
-    public void process(RequestBody requestBody, OutputStream outputStream) throws IOException {
+    public void process(RequestBody requestBody, ByteArrayOutputStream outputStream) throws IOException {
         System.out.println("outputStream inside describeTopicEndpoint is " + outputStream.hashCode());
         ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
-            System.out.println("Handling a proper request");
-            // Response Header
-                byte tag_buffer = 0;
-                responseBuffer.write(requestBody.input_correlation_id);
-                responseBuffer.write(tag_buffer);
-            // Throttle time
-                byte[] throttle_time_ms = intToBytes(0);
-                responseBuffer.write(throttle_time_ms);
-            // Topics Array
-                ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
-                 // Length of array
-                int input_topics_array_size = readUnsignedVarInt(bodyStream);
-                responseBuffer.write(encodeVarInt(input_topics_array_size));
-                System.out.println("Input topics size " + input_topics_array_size);
-                 // Topics Array
-                byte[][] input_topics_names = new byte[input_topics_array_size-1][];
+            try {
+                System.out.println("Handling a proper request");
+                // Response Header
+                    byte tag_buffer = 0;
+                    responseBuffer.write(requestBody.input_correlation_id);
+                    responseBuffer.write(tag_buffer);
+                // Throttle time
+                    byte[] throttle_time_ms = intToBytes(0);
+                    responseBuffer.write(throttle_time_ms);
+                // Topics Array
+                    ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
+                    // Length of array
+                    int input_topics_array_size = readUnsignedVarInt(bodyStream);
+                    responseBuffer.write(encodeVarInt(input_topics_array_size));
+                    System.out.println("Input topics size " + input_topics_array_size);
+                    // Topics Array
+                    byte[][] input_topics_names = new byte[input_topics_array_size-1][];
 
-                for(int i=0; i<input_topics_names.length; i++) {
-                    input_topics_names[i] = readTopicName(bodyStream);
-                }
+                    for(int i=0; i<input_topics_names.length; i++) {
+                        input_topics_names[i] = readTopicName(bodyStream);
+                    }
 
-                byte[] input_response_partition_limit = new byte[4];
-                bodyStream.read(input_response_partition_limit);
-                byte[] input_pagination_tag = new byte[1];
-                bodyStream.read(input_pagination_tag);
+                    byte[] input_response_partition_limit = new byte[4];
+                    bodyStream.read(input_response_partition_limit);
+                    byte[] input_pagination_tag = new byte[1];
+                    bodyStream.read(input_pagination_tag);
+                    // Tag Buffer
+                    bodyStream.read();
+                    byte[] topicsArray = generateTopicsArrayResponse(input_topics_names);
+                    System.out.println("Topics Array is done. Size " + topicsArray.length);
+                    responseBuffer.write(topicsArray);
+                // Next Cursor
+                    responseBuffer.write(255);
                 // Tag Buffer
-                bodyStream.read();
-                byte[] topicsArray = generateTopicsArrayResponse(input_topics_names);
-                System.out.println("Topics Array is done. Size " + topicsArray.length);
-                responseBuffer.write(topicsArray);
-            // Next Cursor
-                responseBuffer.write(255);
-            // Tag Buffer
-                responseBuffer.write(tag_buffer);
+                    responseBuffer.write(tag_buffer);
+            } catch(ClusterMetadataException e) {
+                System.out.println("Endpoint failed reading cluster metadata " + e.getMessage());
+                return;
+            }
+            catch(IOException e) {
+                System.out.println("Endpoint failed due to IO exception " + e.getMessage());
+                return;
+            }
         } else {
             // Throw appropriate error code
             System.out.println("Handling a wrong request");
@@ -73,12 +85,6 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             responseBuffer.write(requestBody.input_correlation_id);
             responseBuffer.write(errorCode);
         }
-        byte[] responseBytes = responseBuffer.toByteArray();
-        // send data to client
-        System.out.println("Finishing. Writting to output stream for describe Topic endpoint");
-        outputStream.write(intToBytes(responseBytes.length));
-        outputStream.write(responseBytes);
-        outputStream.flush();
     }
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
@@ -94,20 +100,35 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         else return null;
     }
 
-    private byte[] generateTopicsArrayResponse(byte[][] input_topics_names) throws IOException{
-        System.out.println("Reading metadata kafka file");
+    private byte[] generateTopicsArrayResponse(byte[][] input_topics_names) throws IOException, ClusterMetadataException{
         ByteArrayOutputStream topicsArrayBuffer = new ByteArrayOutputStream();
         byte tag_buffer = 0;
-        MetadataBatches metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
-        System.out.println("Done reading metadata kafka file. batches:"+metadataBatches.batchesArray.size());
+
+        System.out.println("Reading metadata kafka file");
+        MetadataBatches metadataBatches;
+        try {
+            metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
+        }
+        catch(IOException e) {
+            System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
+            throw e;
+        }
+
+        System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
         System.out.println("Total size of input topics names is " + input_topics_names.length);
         Arrays.stream(input_topics_names).forEach(name -> System.out.println(new String(name)));
-        for(int i=0; i<input_topics_names.length; i++) {
-             // Find the Topic ID before writting
-            byte[] topicId = new byte[16];
-            System.out.println("Writting response for topic name: " + new String(input_topics_names[i]));
 
-            topicId = metadataBatches.findTopicId(input_topics_names[i]);
+        Map<byte[],byte[]> topicNameIdMap = metadataBatches.findTopicId(input_topics_names);
+        if (topicNameIdMap == null) {
+            System.out.println("topic names-ids map is null");
+            throw new ClusterMetadataException("topic names-ids map is null");
+        }
+        for(byte[] topicName : input_topics_names) {
+            // Find the Topic ID before writting
+            byte[] topicId = new byte[16];
+            System.out.println("Writting response for topic name: " + new String(topicName));
+
+            topicId = topicNameIdMap.get(topicName);
             System.out.println("its topic id is: " + topicId);
             if (topicId == null) {
                 // Error Code
@@ -117,9 +138,9 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
             // Topic name
-            int nameLength = input_topics_names[i].length+1;
+            int nameLength = topicName.length+1;
             topicsArrayBuffer.write(encodeVarInt(nameLength));
-            topicsArrayBuffer.write(input_topics_names[i]);
+            topicsArrayBuffer.write(topicName);
             // Topic ID
             if (topicId == null) {
                 byte[] topicIdEmpty= new byte[16];
@@ -131,7 +152,8 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             }
             // is Internal topic
             topicsArrayBuffer.write(0);
-            // partitions array length
+
+            // Partitions array length
             if (topicId == null) {
                 topicsArrayBuffer.write(1);
             }
@@ -197,7 +219,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             topicsArrayBuffer.write(authorizedOperations);
             //tag buffer
             topicsArrayBuffer.write(tag_buffer);
-        }
-        return topicsArrayBuffer.toByteArray();
+    }
+    return topicsArrayBuffer.toByteArray();
     }
 }

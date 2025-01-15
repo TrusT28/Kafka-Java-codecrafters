@@ -2,50 +2,37 @@ package endpoints.DescribeTopic.models;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MetadataBatches {
     public List<Batch> batchesArray = new ArrayList<>();
 
-    public byte[] findTopicId(byte[] topicName) {
-        System.out.println("Searching topic ID for topic name " + new String(topicName));
+    public Map<byte[],byte[]> findTopicId(byte[][] topicNames) {
         if(batchesArray.size() > 0) {
-            List<Batch> filteredBatches = batchesArray.stream().filter(batch -> !batch.isEmptyRecords()).collect(Collectors.toList());
-            System.out.println("filteredBatches size: " + filteredBatches.size());
-            if (!filteredBatches.isEmpty()) {
-                for(int i=0; i<filteredBatches.size(); i++) {
-                    Record[] records = filteredBatches.get(i).records;
-                    System.out.println("This batch has records: " + records.length);
-                    for(int j=0; j<records.length; j++){
-                        byte[] result = findTopicId(records[j].value, topicName);
-                        if(result != null) {
-                            return result;
+            Map<byte[],byte[]> topicNameIdMap = new HashMap<>();
+            for(Batch batch: batchesArray) {
+                System.out.println("This batch has records: " + batch.records.length);
+                for(Record record: batch.records){
+                    if(topicNameIdMap.size() == topicNames.length) {
+                        return topicNameIdMap;
+                    }
+                    if(record.value.getClass()==TopicRecordValue.class) {
+                        TopicRecordValue topicRecordValue = (TopicRecordValue) record.value;
+                        Optional<byte[]> match = Arrays.stream(topicNames).filter(name -> Arrays.equals(name, topicRecordValue.topicName)).findFirst();
+                        if(match.isPresent()) {
+                            topicNameIdMap.put(topicRecordValue.topicName, topicRecordValue.topicUUID);
                         }
                     }
                 }
             }
+            return topicNameIdMap;
         }
         return null;
     }
-
-    private byte[] findTopicId(Value value, byte[] topicName) {
-        if(value.getClass()==TopicRecordValue.class) {
-            System.out.println("Value is of TopicRecord type. Checking topic name match");
-            TopicRecordValue topicRecordValue = (TopicRecordValue) value;
-            System.out.println("Its topic name is: " + new String(topicRecordValue.topicName));
-            if (new String(topicRecordValue.topicName).equals(new String(topicName))) {
-                System.out.println("Topic name matches!");
-                return topicRecordValue.topicUUID;
-            }
-            else {
-                System.out.println("Topic name does not match.");
-                return null;
-            }
-        }
-        else return null;
-    }
-
 
     
     // TODO maybe relation of records within a batch is important. If I found topic record value, I can find based on that record other data?
