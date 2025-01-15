@@ -25,6 +25,10 @@ public class MetadataBatches {
                         Optional<byte[]> match = Arrays.stream(topicNames).filter(name -> Arrays.equals(name, topicRecordValue.topicName)).findFirst();
                         if(match.isPresent()) {
                             topicNameIdMap.put(topicRecordValue.topicName, topicRecordValue.topicUUID);
+                            System.out.println("Found a match for " + new String(topicRecordValue.topicName));
+                        }
+                        else {
+                            System.out.println("This value does not match anything" + new String(topicRecordValue.topicName));
                         }
                     }
                 }
