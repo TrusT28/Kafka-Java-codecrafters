@@ -20,23 +20,41 @@ public class API {
     ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
 
     // TODO make sure input stream is handled well, output stream too. No IO or EOF. readFully causes this.
-    public void processAPI(DataInputStream dataInputStream, OutputStream outputStream) throws ConstructorException, IOException {
+    public void processAPI(DataInputStream dataInputStream, OutputStream outputStream) {
         // Receive data from client and parse
         System.out.println("inside processAPI " + this.hashCode());
         System.out.println("outputStream is " + outputStream.hashCode());
         responseBuffer.reset();
-        RequestBody requestBody = new RequestBody(dataInputStream);
+        RequestBody requestBody;
+        try {
+            requestBody = new RequestBody(dataInputStream);
+        } catch (EOFException | ConstructorException e) {
+            System.out.println("Failed to process input Request body");
+            e.printStackTrace();
+            return;
+        }
         System.out.println("successfully read requestBody " + this.hashCode());
         switch (bytesToInt(requestBody.input_request_api_key)) {
             case API_VERSIONS_KEY:
                 System.out.println("ApiVersions request");
                 ApiVersionsEndpoint apiVersionsEndpoint = new ApiVersionsEndpoint(SUPPORTED_APIs);
-                apiVersionsEndpoint.process(requestBody, outputStream);
+                try {
+                    apiVersionsEndpoint.process(requestBody, outputStream);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    System.out.println("Failed to process describeTopicEndpoint. " + e.getMessage());
+                    e.printStackTrace();
+                }
                 break;
             case DESCRIBE_TOPIC_KEY:
                 System.out.println("DescribeTopic request");
                 DescribeTopicEndpoint describeTopicEndpoint = new DescribeTopicEndpoint();
-                describeTopicEndpoint.process(requestBody, outputStream);
+                try {
+                    describeTopicEndpoint.process(requestBody, outputStream);
+                } catch (IOException e) {
+                    System.out.println("Failed to process describeTopicEndpoint. " + e.getMessage());
+                    e.printStackTrace();
+                }
                 break;
             default:
                 break;
