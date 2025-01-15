@@ -19,6 +19,7 @@ public class RequestBody {
         public RequestBody(DataInputStream dataInputStream) throws ConstructorException, EOFException{
             try {
                 if(dataInputStream.available()>0) {
+                    System.out.println("dataInputStream legnth "+dataInputStream.available());
                     dataInputStream.readFully(input_message_size);
                     dataInputStream.readFully(input_request_api_key);
                     dataInputStream.readFully(input_request_api_version);
@@ -36,7 +37,7 @@ public class RequestBody {
                 }
                 else {
                     System.out.println("Empty Request Body");
-                    throw new ConstructorException("Failed to create InputData: Empty Request Body");
+                    // throw new ConstructorException("Failed to create InputData: Empty Request Body");
                 }
             }
             catch(java.io.EOFException e) {

@@ -35,17 +35,8 @@ public class API {
                 break;
             case DESCRIBE_TOPIC_KEY:
                 System.out.println("DescribeTopic request");
-                try{
                 DescribeTopicEndpoint describeTopicEndpoint = new DescribeTopicEndpoint();
                 describeTopicEndpoint.process(requestBody, outputStream);
-                } catch(EOFException e) {
-                    System.out.println("EOFException in api" + e.getMessage());
-                    throw e;
-                }
-                catch(IOException e) {
-                    System.out.println("IOException in api" + e.getMessage());
-                    throw e;
-                }
                 break;
             default:
                 break;
