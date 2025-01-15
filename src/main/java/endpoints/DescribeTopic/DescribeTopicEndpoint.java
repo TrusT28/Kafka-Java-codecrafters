@@ -113,19 +113,19 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
         System.out.println("Total size of input topics names is " + input_topics_names.length);
         Arrays.stream(input_topics_names).forEach(name -> System.out.println(new String(name)));
-
+        // Find the Topic ID before writting
         Map<byte[],byte[]> topicNameIdMap = metadataBatches.findTopicId(input_topics_names);
         if (topicNameIdMap == null) {
             System.out.println("topic names-ids map is null");
             throw new ClusterMetadataException("topic names-ids map is null");
         }
         for(byte[] topicName : input_topics_names) {
-            // Find the Topic ID before writting
+            
             byte[] topicId = new byte[16];
             System.out.println("Writting response for topic name: " + new String(topicName));
 
             topicId = topicNameIdMap.get(topicName);
-            System.out.println("its topic id is: " + topicId);
+            
             if (topicId == null) {
                 // Error Code
                 topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
@@ -133,9 +133,14 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             else {
                 topicsArrayBuffer.write(shortToBytes((short) 0));
             }
+
             // Topic name
             int nameLength = topicName.length+1;
-            topicsArrayBuffer.write(encodeVarInt(nameLength));
+            System.out.println("Topic name length is " + nameLength);
+            byte[] nameLengthEncoded = encodeVarInt(nameLength);
+            System.out.println("Topic name length after encoding is of length" + nameLengthEncoded.length);
+            System.out.println("Topic name length after encoding is " + readUnsignedVarInt(nameLengthEncoded));
+            topicsArrayBuffer.write(nameLengthEncoded);
             topicsArrayBuffer.write(topicName);
             // Topic ID
             if (topicId == null) {
@@ -206,6 +211,9 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                             e.printStackTrace();
                         }
                     });
+                } else {
+                    System.out.println("Partitions is empty!");
+                    topicsArrayBuffer.write(encodeVarInt(1));
                 }
             }
            
