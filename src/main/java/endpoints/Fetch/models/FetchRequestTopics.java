@@ -14,8 +14,10 @@ public class FetchRequestTopics {
     
     public FetchRequestTopics(InputStream bodyStream) throws ConstructorException {
         try {
+            System.out.println("Reading FetchRequestTopics");
             bodyStream.read(topicUUID);
             paritionsArrayLength = readUnsignedVarInt(bodyStream);
+            System.out.println("paritionsArrayLength " + paritionsArrayLength);
             paritions = new FetchRequestPartitions[paritionsArrayLength-1];
             for(int i=0; i<paritions.length; i++) {
                 paritions[i] = new FetchRequestPartitions(bodyStream);

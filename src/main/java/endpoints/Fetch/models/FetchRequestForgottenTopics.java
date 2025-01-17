@@ -14,6 +14,7 @@ public class FetchRequestForgottenTopics {
 
     public FetchRequestForgottenTopics(InputStream bodyStream) throws ConstructorException {
         try {
+            System.out.println("Reading FetchRequestBody");
             bodyStream.read(topicUUID);
             paritionsArrayLength = readUnsignedVarInt(bodyStream);
             paritions = new byte[paritionsArrayLength-1][4];

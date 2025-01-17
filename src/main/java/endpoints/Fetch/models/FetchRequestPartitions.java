@@ -15,6 +15,7 @@ public class FetchRequestPartitions {
 
     public FetchRequestPartitions(InputStream bodyStream) throws ConstructorException {
         try {
+            System.out.println("Reading FetchRequestPartitions");
             bodyStream.read(parition);
             bodyStream.read(currentLeaderEpoch);
             bodyStream.read(fetchOffset);
