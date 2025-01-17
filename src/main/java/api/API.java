@@ -20,10 +20,7 @@ public class API {
     // TODO make sure input stream is handled well, output stream too. No IO or EOF. readFully causes this.
     public void processAPI(DataInputStream dataInputStream, OutputStream outputStream) throws ConstructorException, IOException {
         // Receive data from client and parse
-        System.out.println("inside processAPI " + this.hashCode());
-        System.out.println("outputStream is " + outputStream.hashCode());
         RequestBody requestBody = new RequestBody(dataInputStream);
-        System.out.println("successfully read requestBody " + this.hashCode());
         ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
         switch (bytesToInt(requestBody.input_request_api_key)) {
             case API_VERSIONS_KEY:
@@ -41,7 +38,6 @@ public class API {
         }
         byte[] responseBytes = responseBuffer.toByteArray();
         // send data to client
-        System.out.println("Finishing. Writting to output stream for describe Topic endpoint");
         outputStream.write(intToBytes(responseBytes.length));
         outputStream.write(responseBytes);
         outputStream.flush();

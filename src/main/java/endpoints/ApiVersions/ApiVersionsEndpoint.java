@@ -25,7 +25,7 @@ public class ApiVersionsEndpoint implements KafkaEndpoint{
             // Only support 0-4 versions
             if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 4) {
                 System.out.println("Handling a proper request");
-                byte[] errorCode = shortToBytes((short) 0);
+                byte[] errorCode = shortToBytes((short) ErrorCodes.NO_ERROR);
                 byte apiKeysArrayDefinition = (byte) (SUPPORTED_APIs.length+1); // 1 element in COMPACT ARRAY + 1 for N+1 encoding
                 byte[] throttle_time_ms = intToBytes(100);
                 byte tag_buffer = 0;
