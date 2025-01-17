@@ -12,23 +12,21 @@ import utils.ConstructorException;
 import static utils.Utils.*;
 
 public class API {
-
-    private final int API_VERSIONS_KEY = 18;
-    private final int DESCRIBE_TOPIC_KEY = 75;
-    private ApiMetadata[] SUPPORTED_APIs = {new ApiMetadata(API_VERSIONS_KEY, 0,4), new ApiMetadata(DESCRIBE_TOPIC_KEY,0,0)};
+    private ApiMetadata[] SUPPORTED_APIs = {new ApiMetadata(ApiCodes.API_VERSIONS_KEY, 0,4), new ApiMetadata(ApiCodes.DESCRIBE_TOPIC_KEY,0,0)};
 
     // TODO make sure input stream is handled well, output stream too. No IO or EOF. readFully causes this.
     public void processAPI(DataInputStream dataInputStream, OutputStream outputStream) throws ConstructorException, IOException {
         // Receive data from client and parse
         RequestBody requestBody = new RequestBody(dataInputStream);
         ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream();
+        System.out.println("Received request with correlation id " + bytesToInt(requestBody.input_correlation_id));
         switch (bytesToInt(requestBody.input_request_api_key)) {
-            case API_VERSIONS_KEY:
+            case ApiCodes.API_VERSIONS_KEY:
                 System.out.println("ApiVersions request");
                 ApiVersionsEndpoint apiVersionsEndpoint = new ApiVersionsEndpoint(SUPPORTED_APIs);
                 apiVersionsEndpoint.process(requestBody, responseBuffer);
                 break;
-            case DESCRIBE_TOPIC_KEY:
+            case ApiCodes.DESCRIBE_TOPIC_KEY:
                 System.out.println("DescribeTopic request");
                 DescribeTopicEndpoint describeTopicEndpoint = new DescribeTopicEndpoint();
                 describeTopicEndpoint.process(requestBody, responseBuffer);
@@ -37,6 +35,7 @@ public class API {
                 break;
         }
         byte[] responseBytes = responseBuffer.toByteArray();
+        System.out.println("Final response is of size " + intToBytes(responseBytes.length));
         // send data to client
         outputStream.write(intToBytes(responseBytes.length));
         outputStream.write(responseBytes);

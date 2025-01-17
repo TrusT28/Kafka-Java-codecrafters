@@ -18,31 +18,29 @@ public class RequestBody {
 
         public RequestBody(DataInputStream dataInputStream) throws ConstructorException, EOFException{
             try {
-                if(dataInputStream.available()>0) {
-                    System.out.println("dataInputStream legnth "+dataInputStream.available());
-                    dataInputStream.readFully(input_message_size);
-                    dataInputStream.readFully(input_request_api_key);
-                    dataInputStream.readFully(input_request_api_version);
-                    dataInputStream.readFully(input_correlation_id);
+                System.out.println("dataInputStream legnth "+dataInputStream.available());
+                dataInputStream.readFully(input_message_size);
+                dataInputStream.readFully(input_request_api_key);
+                dataInputStream.readFully(input_request_api_version);
+                dataInputStream.readFully(input_correlation_id);
 
+                int requestHeaderSize = input_request_api_key.length + input_request_api_version.length + input_correlation_id.length;
+
+                if(bytesToInt(input_request_api_key) == ApiCodes.DESCRIBE_TOPIC_KEY) {
                     dataInputStream.readFully(input_client_id_length);
                     input_client_id = new byte[bytesToInt(input_client_id_length)];
                     dataInputStream.readFully(input_client_id);
-
                     // Tag Buffer
                     dataInputStream.read();
-                    int requestHeaderSize = input_request_api_key.length + input_request_api_version.length + input_correlation_id.length + input_client_id_length.length + input_client_id.length + 1;
-                    body = new byte[bytesToInt(input_message_size) - requestHeaderSize];
-                    dataInputStream.readFully(body);
+                    requestHeaderSize += input_client_id_length.length + input_client_id.length + 1;
                 }
-                else {
-                    System.out.println("Empty Request Body");
-                    // throw new ConstructorException("Failed to create InputData: Empty Request Body");
-                }
+                
+                body = new byte[bytesToInt(input_message_size) - requestHeaderSize];
+                dataInputStream.readFully(body);
             }
             catch(java.io.EOFException e) {
                 System.out.println("Unexpected EOF when reading Request Body");
-                throw e;
+                throw new ConstructorException(e.getMessage());
             }
             catch(IOException e) {
                 throw new ConstructorException("Failed to create InputData: "+ e);
