@@ -105,6 +105,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
           // Topics Array
           for(byte[] topicName: topicNames) {
               byte[] topicId = topicNameIdMap.get(new String(topicName));
+              System.out.println("Name,ID:" + new String(topicName) + "," + Arrays.toString(topicId));
               byte[] topicsArray = generateTopicResponse(topicName, topicId, responsePartitionsLimit, metadataBatches);
               responseBuffer.write(topicsArray);
               System.out.println("Topics Array for name " + new String(topicName) + " is done. Size " + topicsArray.length);
@@ -138,6 +139,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         }
         else {
             System.out.println("Found partitions " + partitions.size());
+
             partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
             partitions.forEach(p -> System.out.println(bytesToInt(p.partitionId)));
 

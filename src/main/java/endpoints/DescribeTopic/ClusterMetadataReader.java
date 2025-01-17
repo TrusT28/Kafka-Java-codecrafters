@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.math.BigInteger;
 import org.apache.commons.io.FileUtils;
 
@@ -160,7 +161,7 @@ public class ClusterMetadataReader {
             PartitionRecordValue partitionRecordValue = new PartitionRecordValue();
             inputStream.read(partitionRecordValue.partitionId);
             inputStream.read(partitionRecordValue.topicUUID);
-
+            System.out.println("Found PartitionId,TopicId: " + bytesToInt(partitionRecordValue.partitionId) + "," + Arrays.toString(partitionRecordValue.topicUUID));
             partitionRecordValue.replicaArrayLength = readUnsignedVarInt(inputStream);
             System.out.println("replicaArrayLength " + partitionRecordValue.replicaArrayLength);
             if(partitionRecordValue.replicaArrayLength > 1){
@@ -217,7 +218,6 @@ public class ClusterMetadataReader {
             }
 
             partitionRecordValue.taggedFieldsCount = readUnsignedVarInt(inputStream);
-            System.out.println("taggedFieldsCount size " + partitionRecordValue.taggedFieldsCount);
             if(partitionRecordValue.taggedFieldsCount != 0){
                 // TODO parse taggedFields
                byte[] taggedFields = new byte[partitionRecordValue.taggedFieldsCount];
@@ -232,16 +232,14 @@ public class ClusterMetadataReader {
             System.out.println("Reading topic record value");
             TopicRecordValue topicRecordValue = new TopicRecordValue();
             topicRecordValue.nameLength = readUnsignedVarInt(inputStream);
-            System.out.println("nameLength :" + topicRecordValue.nameLength);
             if(topicRecordValue.nameLength != 0){
                 byte[] name = new byte[topicRecordValue.nameLength-1];
                 inputStream.read(name);
                 topicRecordValue.topicName = name;
             }
             inputStream.read(topicRecordValue.topicUUID);
-           
+            System.out.println("Found Topic,Id: " + new String(topicRecordValue.topicName) + "," + Arrays.toString(topicRecordValue.topicUUID));
             topicRecordValue.taggedFieldsCount = readUnsignedVarInt(inputStream);
-            System.out.println("taggedFieldsCount :" + topicRecordValue.taggedFieldsCount);
             if(topicRecordValue.taggedFieldsCount != 0){
                 // TODO parse taggedFields
                byte[] taggedFields = new byte[topicRecordValue.taggedFieldsCount];
@@ -263,7 +261,6 @@ public class ClusterMetadataReader {
             inputStream.read(featureLevelValue.featureLevel);
 
             featureLevelValue.taggedFieldsCount = readUnsignedVarInt(inputStream);
-            System.out.println("taggedFieldsCount :" + featureLevelValue.taggedFieldsCount);
             if(featureLevelValue.taggedFieldsCount > 0){
                  // TODO parse taggedFields
                 byte[] taggedFields = new byte[featureLevelValue.taggedFieldsCount];
