@@ -123,11 +123,11 @@ public class Fetch implements KafkaEndpoint{
 
     private byte[] writeTopicParitions(FetchRequestTopic topics, String topicName) throws IOException {
         ByteArrayOutputStream partitionsResponseBuffer = new ByteArrayOutputStream();
+        TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
         byte tagBuffer = 0;
         
         boolean topicExists;
         if (topicName!=null && !topicName.isEmpty()) {
-            TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
             topicExists = topicMetadataReader.topicMetadataFileExists(topicName);
         }
         else {
@@ -164,7 +164,14 @@ public class Fetch implements KafkaEndpoint{
         byte[] preferredReadReplica = new byte[4];
         partitionsResponseBuffer.write(preferredReadReplica);
         // records => COMPACT_RECORDS
-        partitionsResponseBuffer.write(encodeVarInt(0));
+        if(topicExists) {
+            byte[] topicRecords = topicMetadataReader.readTopicRecords(topicName);
+            partitionsResponseBuffer.write(encodeVarInt(2));
+            partitionsResponseBuffer.write(topicRecords);
+        }
+        else {
+            partitionsResponseBuffer.write(encodeVarInt(0));
+        }
         partitionsResponseBuffer.write(tagBuffer);
 
         return partitionsResponseBuffer.toByteArray();

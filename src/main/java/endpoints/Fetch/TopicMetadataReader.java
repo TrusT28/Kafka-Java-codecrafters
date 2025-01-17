@@ -22,12 +22,13 @@ public class TopicMetadataReader {
         }
     }
 
-    public void parseTopicFile(String topicName) throws IOException {
+    public byte[] readTopicRecords(String topicName) throws IOException {
         System.out.println("Parsing cluster metadata file");
         String fileName = "/tmp/kraft-combined-logs/" + topicName + "-0/00000000000000000000.log";
         File file = new File(fileName);
         System.out.println("File exists? " + file.exists());
         System.out.println("File total length: " + file.length());
         ByteArrayInputStream inputStream = new ByteArrayInputStream(FileUtils.readFileToByteArray(file));
+        return inputStream.readAllBytes();
     }
 }
