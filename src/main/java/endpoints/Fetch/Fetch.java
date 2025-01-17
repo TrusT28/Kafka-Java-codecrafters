@@ -11,14 +11,10 @@ import utils.ErrorCodes;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-
-import api.ApiMetadata;
 import api.RequestBody;
 import endpoints.KafkaEndpoint;
 import endpoints.Fetch.models.FetchRequestBody;
 import endpoints.Fetch.models.FetchRequestTopic;
-import endpoints.Fetch.models.FetchRequestTopics;
 
 public class Fetch implements KafkaEndpoint{
 
