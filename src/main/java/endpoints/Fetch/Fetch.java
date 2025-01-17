@@ -1,6 +1,7 @@
 package endpoints.Fetch;
 
 import static utils.Utils.bytesToInt;
+import static utils.Utils.encodeVarInt;
 import static utils.Utils.intToBytes;
 import static utils.Utils.shortToBytes;
 import utils.ErrorCodes;
@@ -26,12 +27,12 @@ public class Fetch implements KafkaEndpoint{
 
                 // Send data to client
                 responseBuffer.write(requestBody.input_correlation_id);
-                responseBuffer.write(errorCode);
                 responseBuffer.write(throttle_time_ms);
+                responseBuffer.write(errorCode);
                 // Session Id
                 responseBuffer.write(intToBytes(0));
                 // Responses
-                
+                responseBuffer.write(encodeVarInt(0));
                 responseBuffer.write(tag_buffer);
             } else {
                 // Throw appropriate error code
