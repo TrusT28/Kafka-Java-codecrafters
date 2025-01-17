@@ -17,6 +17,7 @@ import api.ApiMetadata;
 import api.RequestBody;
 import endpoints.KafkaEndpoint;
 import endpoints.Fetch.models.FetchRequestBody;
+import endpoints.Fetch.models.FetchRequestTopic;
 import endpoints.Fetch.models.FetchRequestTopics;
 
 public class Fetch implements KafkaEndpoint{
@@ -42,7 +43,7 @@ public class Fetch implements KafkaEndpoint{
                     return;
                 }
                 // Write response
-
+                System.out.println("Writting Fetch response");
                 // Response Header
                 responseBuffer.write(requestBody.input_correlation_id);
                 responseBuffer.write(tag_buffer);
@@ -72,16 +73,13 @@ public class Fetch implements KafkaEndpoint{
         if(requestBody.topicsArrayLength>1) {
             // Responses Length
             responseBuffer.write(encodeVarInt(requestBody.topicsArrayLength));
-            for(FetchRequestTopics topics : requestBody.topics) {
+            for(FetchRequestTopic topic : requestBody.topics) {
                 // Topic ID
-                responseBuffer.write(topics.topicUUID);
-                // TODO Partitions hardcoded
-                    // Length
-                    responseBuffer.write(encodeVarInt(2));
-                    // Partitions index
-                    responseBuffer.write(intToBytes(0));
-                    // Error code
-                    responseBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+                responseBuffer.write(topic.topicUUID);
+                // Partitions Array
+                byte[] partitionsResponse = writeTopicParitions(topic);
+                responseBuffer.write(partitionsResponse);
+                // Tag Buffer
                 responseBuffer.write(tag_buffer);
             }
         }
@@ -91,5 +89,39 @@ public class Fetch implements KafkaEndpoint{
             responseBuffer.write(encodeVarInt(0));
         }
         responseBuffer.write(tag_buffer);
+    }
+
+    private byte[] writeTopicParitions(FetchRequestTopic topics) throws IOException {
+        ByteArrayOutputStream partitionsResponseBuffer = new ByteArrayOutputStream();
+        byte tagBuffer = 0;
+
+        // Length
+        partitionsResponseBuffer.write(encodeVarInt(2));
+        // Partition index
+        partitionsResponseBuffer.write(intToBytes(0));
+        // Error code
+        partitionsResponseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
+        // high_watermark => INT64
+        byte[] highWaterMark = new byte[8];
+        partitionsResponseBuffer.write(highWaterMark);
+        // last_stable_offset => INT64
+        byte[] lastStableOffset = new byte[8];
+        partitionsResponseBuffer.write(lastStableOffset);
+        // log_start_offset => INT64
+        byte[] logStartOffset = new byte[8];
+        partitionsResponseBuffer.write(logStartOffset);
+        // aborted_transactions => producer_id first_offset TAG_BUFFER 
+        // Length
+        partitionsResponseBuffer.write(encodeVarInt(0));
+            // producer_id => INT64
+            // first_offset => INT64
+        // preferred_read_replica => INT32
+        byte[] preferredReadReplica = new byte[4];
+        partitionsResponseBuffer.write(preferredReadReplica);
+        // records => COMPACT_RECORDS
+        partitionsResponseBuffer.write(encodeVarInt(0));
+        partitionsResponseBuffer.write(tagBuffer);
+
+        return partitionsResponseBuffer.toByteArray();
     }
 }

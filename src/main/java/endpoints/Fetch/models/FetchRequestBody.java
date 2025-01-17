@@ -15,7 +15,7 @@ public class FetchRequestBody {
     public byte[] sessionId = new byte[4];
     public byte[] sessionEpoch = new byte[4];
     public int topicsArrayLength;
-    public FetchRequestTopics[] topics;
+    public FetchRequestTopic[] topics;
     public int forgottenTopicsArrayLength;
     public FetchRequestForgottenTopics[] forgottenTopics;
     public int rackIdLength;
@@ -33,9 +33,9 @@ public class FetchRequestBody {
             topicsArrayLength = readUnsignedVarInt(bodyStream);
             System.out.println("topicsArrayLength " + topicsArrayLength);
             if (topicsArrayLength > 1) {
-                topics = new FetchRequestTopics[topicsArrayLength-1];
+                topics = new FetchRequestTopic[topicsArrayLength-1];
                 for(int i=0; i<topics.length; i++) {
-                    topics[i] = new FetchRequestTopics(bodyStream);
+                    topics[i] = new FetchRequestTopic(bodyStream);
                 }
             }
             forgottenTopicsArrayLength = readUnsignedVarInt(bodyStream);

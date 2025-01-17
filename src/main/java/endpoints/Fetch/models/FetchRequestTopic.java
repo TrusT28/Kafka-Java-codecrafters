@@ -7,12 +7,12 @@ import java.io.InputStream;
 
 import utils.ConstructorException;
 
-public class FetchRequestTopics {
+public class FetchRequestTopic {
     public byte[] topicUUID = new byte[16];
     public int paritionsArrayLength;
     public FetchRequestPartitions[] paritions;
     
-    public FetchRequestTopics(InputStream bodyStream) throws ConstructorException {
+    public FetchRequestTopic(InputStream bodyStream) throws ConstructorException {
         try {
             System.out.println("Reading FetchRequestTopics");
             bodyStream.read(topicUUID);
