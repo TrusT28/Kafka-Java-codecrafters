@@ -59,9 +59,33 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                     bodyStream.read(input_pagination_tag);
                     // Tag Buffer
                     bodyStream.read();
-                    byte[] topicsArray = generateTopicsArrayResponse(input_topics_names);
-                    System.out.println("Topics Array is done. Size " + topicsArray.length);
-                    responseBuffer.write(topicsArray);
+
+                    // Write topics array
+                    System.out.println("Reading metadata kafka file");
+                    MetadataBatches metadataBatches;
+                    try {
+                        metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
+                    }
+                    catch(IOException e) {
+                        System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
+                        throw e;
+                    }
+            
+                    System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
+                    System.out.println("Total size of input topics names is " + input_topics_names.length);
+                    Arrays.stream(input_topics_names).forEach(name -> System.out.println(new String(name)));
+                    Map<String,byte[]> topicNameIdMap = metadataBatches.findTopicId(input_topics_names);
+                    if (topicNameIdMap == null) {
+                        System.out.println("topic names-ids map is null");
+                        throw new ClusterMetadataException("topic names-ids map is null");
+                    }
+
+                    for(byte[] topicName: input_topics_names) {
+                        byte[] topicId = topicNameIdMap.get(new String(topicName));
+                        byte[] topicsArray = generateTopicResponse(topicName, topicId, bytesToInt(input_response_partition_limit), metadataBatches);
+                        responseBuffer.write(topicsArray);
+                        System.out.println("Topics Array for name " + new String(topicName) + " is done. Size " + topicsArray.length);
+                    }
                 // Next Cursor
                     responseBuffer.write(255);
                 // Tag Buffer
@@ -86,7 +110,6 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
         int topic_name_length = readUnsignedVarInt(topic);
-        System.out.println("Length of topic name is " + topic_name_length);
         if(topic_name_length > 1) {
             byte[] topic_name = new byte[topic_name_length-1];
             topic.read(topic_name);
@@ -97,139 +120,126 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         else return null;
     }
 
-    private byte[] generateTopicsArrayResponse(byte[][] input_topics_names) throws IOException, ClusterMetadataException{
+
+    private byte[] generatePartitionsArray(byte[] topicId, int partitionsLimit, MetadataBatches metadataBatches) throws IOException {
+        ByteArrayOutputStream partitionsArrayBuffer = new ByteArrayOutputStream();
+        byte tagBuffer = 0;
+        ArrayList<PartitionRecordValue> partitions = metadataBatches.findPartitions(topicId);
+        if(partitions == null) {
+            System.out.println("No partitions found");
+            partitionsArrayBuffer.write(1);
+        }
+        else {
+            System.out.println("Found partitions " + partitions.size());
+            partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
+            partitions.forEach(p -> System.out.println(bytesToInt(p.partitionId)));
+
+            if(partitions.size() > partitionsLimit) {
+                partitions = new ArrayList<PartitionRecordValue> (partitions.subList(0, partitionsLimit-1));
+                System.out.println("Limiting partitions amount from limit " + partitionsLimit + " now size is " + partitions.size());
+            }
+            // Array length (+1 size)
+            partitionsArrayBuffer.write(encodeVarInt(partitions.size()+1));
+            for(PartitionRecordValue partition: partitions) {
+                    // Error code
+                    partitionsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+                    // Partition Id
+                    partitionsArrayBuffer.write(partition.partitionId);
+                    // Leader Id
+                    partitionsArrayBuffer.write(partition.leader);
+                    // Leader Epoch
+                    partitionsArrayBuffer.write(partition.leaderEpoch);
+                    // Replica Nodes
+                        // array length
+                        System.out.println("Replica nodes count: " + partition.replicaArrayLength);
+                        partitionsArrayBuffer.write(encodeVarInt(partition.replicaArrayLength));
+                        // replica ids
+                        Optional.ofNullable(partition.replicaArray)
+                            .ifPresent(array -> Arrays.stream(array).forEach(id -> {
+                            try {
+                                partitionsArrayBuffer.write(id);
+                            } catch (IOException e) {
+                                System.out.println("failed to write replica array");
+                                e.printStackTrace();
+                            }
+                        }));
+                    // ISR Nodes
+                        // array length
+                        partitionsArrayBuffer.write(encodeVarInt(partition.insyncReplicaArrayLength));
+                        // replica ids
+                        Optional.ofNullable(partition.insyncReplicaArray)
+                            .ifPresent(array -> Arrays.stream(array).forEach(id -> {
+                            try {
+                                partitionsArrayBuffer.write(id);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }));
+                    // Eligible Leader Replicas
+                    partitionsArrayBuffer.write(1);
+                    // Last Known ELR
+                    partitionsArrayBuffer.write(1);
+                    // Offline Replicas
+                    partitionsArrayBuffer.write(1);
+                    // Tag Buffer
+                    partitionsArrayBuffer.write(tagBuffer);
+            };
+        }
+
+        return partitionsArrayBuffer.toByteArray();
+    }
+
+    private byte[] generateTopicResponse(byte[] topicName, byte[] topicId, int partitionsLimit, MetadataBatches metadataBatches) throws IOException, ClusterMetadataException{
         ByteArrayOutputStream topicsArrayBuffer = new ByteArrayOutputStream();
         byte tag_buffer = 0;
+        System.out.println("Writting response for topic name: " + new String(topicName));
 
-        System.out.println("Reading metadata kafka file");
-        MetadataBatches metadataBatches;
-        try {
-            metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
-        }
-        catch(IOException e) {
-            System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
-            throw e;
-        }
+        if(topicId == null) {
+            System.out.println("topicID is null");
 
-        System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
-        System.out.println("Total size of input topics names is " + input_topics_names.length);
-        Arrays.stream(input_topics_names).forEach(name -> System.out.println(new String(name)));
-        // Find the Topic ID before writting
-        Map<String,byte[]> topicNameIdMap = metadataBatches.findTopicId(input_topics_names);
-        if (topicNameIdMap == null) {
-            System.out.println("topic names-ids map is null");
-            throw new ClusterMetadataException("topic names-ids map is null");
-        }
-        for(byte[] topicName : input_topics_names) {
-            
-            byte[] topicId = new byte[16];
-            System.out.println("Writting response for topic name: " + new String(topicName));
-
-            topicId = topicNameIdMap.get(new String(topicName));
-            if (topicId == null) {
-                System.out.println("topicID is null");
-                // Error Code
-                topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
-            }
-            else {
-                System.out.println("topicID exists");
-                topicsArrayBuffer.write(shortToBytes((short) 0));
-            }
-
-            // Topic name
-            int nameLength = topicName.length+1;
-            byte[] nameLengthEncoded = encodeVarInt(nameLength);
-            topicsArrayBuffer.write(nameLengthEncoded);
-            topicsArrayBuffer.write(topicName);
+            // Error Code
+            topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
+            // Topic Name
+                // String Length
+                int nameLength = topicName.length+1;
+                byte[] nameLengthEncoded = encodeVarInt(nameLength);
+                topicsArrayBuffer.write(nameLengthEncoded);
+                // String Content
+                topicsArrayBuffer.write(topicName);
             // Topic ID
-            if (topicId == null) {
-                byte[] topicIdEmpty= new byte[16];
-                Arrays.fill(topicIdEmpty, (byte) 0);
-                topicsArrayBuffer.write(topicIdEmpty);
-            }
-            else {
-                topicsArrayBuffer.write(topicId);
-            }
-
-            // is Internal topic
+            byte[] topicIdEmpty= new byte[16];
+            Arrays.fill(topicIdEmpty, (byte) 0);
+            topicsArrayBuffer.write(topicIdEmpty);
+            // Is Internal
             topicsArrayBuffer.write(0);
+            // Partitions Array
+            topicsArrayBuffer.write(1);
+        }
+        else {
+            System.out.println("topicID exists");
+            // Error Code
+            topicsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+            // Topic Name
+                // String Length
+                int nameLength = topicName.length+1;
+                byte[] nameLengthEncoded = encodeVarInt(nameLength);
+                topicsArrayBuffer.write(nameLengthEncoded);
+                // String Content
+                topicsArrayBuffer.write(topicName);
+            // Topic ID
+            topicsArrayBuffer.write(topicId);
+            // Is Internal
+            topicsArrayBuffer.write(0);
+            // Partitions Array
+            byte[] parittionsArray = generatePartitionsArray(topicId, partitionsLimit, metadataBatches);
+            topicsArrayBuffer.write(parittionsArray);
+        }
 
-            // Partitions array length
-            if (topicId == null) {
-                topicsArrayBuffer.write(1);
-            }
-            else {
-                ArrayList<PartitionRecordValue> partitions = metadataBatches.findPartitions(topicId);
-                if(partitions == null) {
-                    System.out.println("No partitions found");
-                    topicsArrayBuffer.write(1);
-                }
-                else {
-                    System.out.println("Found partitions " + partitions.size());
-                    partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
-                    // Array length (+1 size)
-                    topicsArrayBuffer.write(encodeVarInt(partitions.size()+1));
-                    partitions.forEach(partition -> {
-                        try {
-                            // Error code
-                            topicsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
-                            // Partition Id
-                            topicsArrayBuffer.write(partition.partitionId);
-                            // Leader Id
-                            topicsArrayBuffer.write(partition.leader);
-                            // Leader Epoch
-                            topicsArrayBuffer.write(partition.leaderEpoch);
-                            // Replica Nodes
-                                // array length
-                                System.out.println("Replica nodes count: " + partition.replicaArrayLength);
-                                topicsArrayBuffer.write(encodeVarInt(partition.replicaArrayLength));
-                                // replica ids
-                                
-                                Optional.ofNullable(partition.replicaArray)
-                                    .ifPresent(array -> Arrays.stream(array).forEach(id -> {
-                                    try {
-                                        topicsArrayBuffer.write(id);
-                                    } catch (IOException e) {
-                                        System.out.println("failed to write replica array");
-                                        e.printStackTrace();
-                                    }
-                                }));
-                            // ISR Nodes
-                                // array length
-                                topicsArrayBuffer.write(encodeVarInt(partition.insyncReplicaArrayLength));
-                                // replica ids
-                                Optional.ofNullable(partition.insyncReplicaArray)
-                                    .ifPresent(array -> Arrays.stream(array).forEach(id -> {
-                                    try {
-                                        topicsArrayBuffer.write(id);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }));
-                            //TODO how to get these?
-                            // Eligible Leader Replicas
-                            topicsArrayBuffer.write(1);
-                            // Last Known ELR
-                            topicsArrayBuffer.write(1);
-                            // Offline Replicas
-                            topicsArrayBuffer.write(1);
-                            // Tag Buffer
-                            topicsArrayBuffer.write(tag_buffer);
-                        } catch (IOException e) {
-                            // Handle the exception, for example, logging it or rethrowing as a runtime exception
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }
-           
-            //Topic Authorized Operations
-            // TODO handle it properly, instead of hardcoded value
-            byte[] authorizedOperations = {0,0,0,0,1,1,0,1,1,1,1,1,1,0,0,0};
-            topicsArrayBuffer.write(authorizedOperations);
-            //tag buffer
-            topicsArrayBuffer.write(tag_buffer);
-    }
-    return topicsArrayBuffer.toByteArray();
+        // Topic Authorized Operations
+        byte[] authorizedOperations = {0,0,0,0,1,1,0,1,1,1,1,1,1,0,0,0};
+        topicsArrayBuffer.write(authorizedOperations);
+        // Tag Buffer
+        topicsArrayBuffer.write(tag_buffer);
+        return topicsArrayBuffer.toByteArray();
     }
 }
