@@ -37,6 +37,10 @@ public class Fetch implements KafkaEndpoint{
                     System.out.println("Failed to read Fetch Request body");
                     return;
                 }
+                catch(Exception e) {
+                    System.out.println("Failed to read Fetch Request body. Unexpected error " + e.getStackTrace());
+                    return;
+                }
                 // Write response
 
                 // Response Header
