@@ -12,7 +12,11 @@ import utils.ConstructorException;
 import static utils.Utils.*;
 
 public class API {
-    private ApiMetadata[] SUPPORTED_APIs = {new ApiMetadata(ApiCodes.API_VERSIONS_KEY, 0,4), new ApiMetadata(ApiCodes.DESCRIBE_TOPIC_KEY,0,0)};
+    private ApiMetadata[] SUPPORTED_APIs = {
+        new ApiMetadata(ApiCodes.API_VERSIONS_KEY, 0,4), 
+        new ApiMetadata(ApiCodes.DESCRIBE_TOPIC_KEY,0,0),
+        new ApiMetadata(ApiCodes.FETCH_KEY, 0, 16)
+    };
 
     // TODO make sure input stream is handled well, output stream too. No IO or EOF. readFully causes this.
     public void processAPI(DataInputStream dataInputStream, OutputStream outputStream) throws ConstructorException, IOException {
