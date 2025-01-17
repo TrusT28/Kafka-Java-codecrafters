@@ -91,8 +91,8 @@ public class ClusterMetadataReader {
             System.out.println("This record length is " + record.recordLength);
 
             inputStream.read(record.attributes);
-            inputStream.read(record.timestampData);
-            inputStream.read(record.offsetDelta);
+            record.timestampDelta = readSignedVarInt(inputStream);
+            record.offsetDelta = readSignedVarInt(inputStream);
 
             record.keyLength = readSignedVarInt(inputStream);
             System.out.println("This keyLength is " + record.keyLength);
@@ -185,7 +185,6 @@ public class ClusterMetadataReader {
             partitionRecordValue.removingReplicaArrayLength = readUnsignedVarInt(inputStream);
             System.out.println("removingReplicaArrayLength size " + partitionRecordValue.removingReplicaArrayLength);
             if(partitionRecordValue.removingReplicaArrayLength>1){
-                //TODO make sure removing replica has 4 bytes
                 byte[][] removingReplicaArray = new byte[partitionRecordValue.removingReplicaArrayLength-1][4];
                 for(int i=0; i<removingReplicaArray.length; i++) {
                     inputStream.read(removingReplicaArray[i]);
@@ -196,7 +195,6 @@ public class ClusterMetadataReader {
             partitionRecordValue.addingReplicaArrayLength = readUnsignedVarInt(inputStream);
             System.out.println("addingReplicaArrayLength size " + partitionRecordValue.addingReplicaArrayLength);
             if(partitionRecordValue.addingReplicaArrayLength > 1){
-                //TODO make sure adding replica has 4 bytes
                 byte[][] addingReplicaArray = new byte[partitionRecordValue.addingReplicaArrayLength-1][4];
                 for(int i=0; i<addingReplicaArray.length; i++) {
                     inputStream.read(addingReplicaArray[i]);

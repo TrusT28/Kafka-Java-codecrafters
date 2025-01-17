@@ -26,5 +26,5 @@ public class PartitionRecordValue extends Value {
     public byte[][] directoriesArray = null; // array of 16 bytes uuids
     // unsigned varint
     public int taggedFieldsCount;
-    public byte[] taggedFields = null; // TODO
+    public byte[] taggedFields = null;
 }
