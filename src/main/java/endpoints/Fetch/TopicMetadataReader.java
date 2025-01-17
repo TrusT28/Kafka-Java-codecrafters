@@ -23,6 +23,7 @@ public class TopicMetadataReader {
     }
 
     public byte[] readTopicRecords(String topicName) throws IOException {
+        // TODO Actually parse the file and count records
         System.out.println("Parsing cluster metadata file");
         String fileName = "/tmp/kraft-combined-logs/" + topicName + "-0/00000000000000000000.log";
         File file = new File(fileName);

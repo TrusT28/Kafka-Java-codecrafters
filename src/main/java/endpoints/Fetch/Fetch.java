@@ -165,6 +165,7 @@ public class Fetch implements KafkaEndpoint{
         partitionsResponseBuffer.write(preferredReadReplica);
         // records => COMPACT_RECORDS
         if(topicExists) {
+            // TODO Actually parse the file and count records
             byte[] topicRecords = topicMetadataReader.readTopicRecords(topicName);
             partitionsResponseBuffer.write(encodeVarInt(2));
             partitionsResponseBuffer.write(topicRecords);
