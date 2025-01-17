@@ -7,6 +7,7 @@ import java.io.OutputStream;
 
 import endpoints.ApiVersions.ApiVersionsEndpoint;
 import endpoints.DescribeTopic.DescribeTopicEndpoint;
+import endpoints.Fetch.Fetch;
 import utils.ConstructorException;
 
 import static utils.Utils.*;
@@ -34,6 +35,11 @@ public class API {
                 System.out.println("DescribeTopic request");
                 DescribeTopicEndpoint describeTopicEndpoint = new DescribeTopicEndpoint();
                 describeTopicEndpoint.process(requestBody, responseBuffer);
+                break;
+            case ApiCodes.FETCH_KEY:
+                System.out.println("Fetch request");
+                Fetch fetch = new Fetch();
+                fetch.process(requestBody, responseBuffer);
                 break;
             default:
                 break;
