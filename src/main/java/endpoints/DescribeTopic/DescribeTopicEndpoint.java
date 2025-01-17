@@ -210,9 +210,10 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
             // Topic Name
                 // String Length
-                int nameLength = topicName.length+1;
-                byte[] nameLengthEncoded = encodeVarInt(nameLength);
-                topicsArrayBuffer.write(nameLengthEncoded);
+                // TODO remove after test
+                //int nameLength = topicName.length+1;
+                //byte[] nameLengthEncoded = encodeVarInt(nameLength);
+                topicsArrayBuffer.write( 4);
                 // String Content
                 topicsArrayBuffer.write(topicName);
             // Topic ID
