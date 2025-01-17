@@ -32,64 +32,31 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
             try {
+                byte tagBuffer = 0;
                 System.out.println("Handling a proper request");
-                // Response Header
-                    byte tag_buffer = 0;
-                    responseBuffer.write(requestBody.input_correlation_id);
-                    responseBuffer.write(tag_buffer);
-                // Throttle time
-                    byte[] throttle_time_ms = intToBytes(0);
-                    responseBuffer.write(throttle_time_ms);
-                // Topics Array
-                    ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
+                ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
+                // Finish reading Request Body
                     // Length of array
-                    int input_topics_array_size = readUnsignedVarInt(bodyStream);
-                    responseBuffer.write(encodeVarInt(input_topics_array_size));
-                    System.out.println("Input topics size " + input_topics_array_size);
+                    int topicNamesArraySize = readUnsignedVarInt(bodyStream);
+                    System.out.println("Input topics size " + topicNamesArraySize);
                     // Topics Array
-                    byte[][] input_topics_names = new byte[input_topics_array_size-1][];
-
-                    for(int i=0; i<input_topics_names.length; i++) {
-                        input_topics_names[i] = readTopicName(bodyStream);
+                    byte[][] topicNames = new byte[topicNamesArraySize-1][];
+                    for(int i=0; i<topicNames.length; i++) {
+                        topicNames[i] = readTopicName(bodyStream);
                     }
 
-                    byte[] input_response_partition_limit = new byte[4];
-                    bodyStream.read(input_response_partition_limit);
-                    byte[] input_pagination_tag = new byte[1];
-                    bodyStream.read(input_pagination_tag);
+                    byte[] responsePartitionsLimit = new byte[4];
+                    bodyStream.read(responsePartitionsLimit);
+                    byte[] paginationTag = new byte[1];
+                    bodyStream.read(paginationTag);
                     // Tag Buffer
                     bodyStream.read();
 
-                    // Write topics array
-                    System.out.println("Reading metadata kafka file");
-                    MetadataBatches metadataBatches;
-                    try {
-                        metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
-                    }
-                    catch(IOException e) {
-                        System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
-                        throw e;
-                    }
-            
-                    System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
-                    System.out.println("Total size of input topics names is " + input_topics_names.length);
-                    Arrays.stream(input_topics_names).forEach(name -> System.out.println(new String(name)));
-                    Map<String,byte[]> topicNameIdMap = metadataBatches.findTopicId(input_topics_names);
-                    if (topicNameIdMap == null) {
-                        System.out.println("topic names-ids map is null");
-                        throw new ClusterMetadataException("topic names-ids map is null");
-                    }
-
-                    for(byte[] topicName: input_topics_names) {
-                        byte[] topicId = topicNameIdMap.get(new String(topicName));
-                        byte[] topicsArray = generateTopicResponse(topicName, topicId, bytesToInt(input_response_partition_limit), metadataBatches);
-                        responseBuffer.write(topicsArray);
-                        System.out.println("Topics Array for name " + new String(topicName) + " is done. Size " + topicsArray.length);
-                    }
-                // Next Cursor
-                    responseBuffer.write(255);
-                // Tag Buffer
-                    responseBuffer.write(tag_buffer);
+                // Response Header (v1)
+                responseBuffer.write(requestBody.input_correlation_id);
+                responseBuffer.write(tagBuffer);
+                // Response Body (v0)
+                writeResponseBody(responseBuffer, topicNames, bytesToInt(responsePartitionsLimit));
             } catch(ClusterMetadataException e) {
                 System.out.println("Endpoint failed reading cluster metadata " + e.getMessage());
                 return;
@@ -106,6 +73,46 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             responseBuffer.write(requestBody.input_correlation_id);
             responseBuffer.write(errorCode);
         }
+    }
+
+    private void writeResponseBody(ByteArrayOutputStream responseBuffer, byte[][] topicNames, int responsePartitionsLimit) throws ClusterMetadataException, IOException {
+          byte tag_buffer = 0;
+        // Throttle time
+          byte[] throttle_time_ms = intToBytes(0);
+          responseBuffer.write(throttle_time_ms);
+        // Prepare topic Ids
+          System.out.println("Reading metadata kafka file");
+          MetadataBatches metadataBatches;
+          try {
+              metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
+          }
+          catch(IOException e) {
+              System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
+              throw e;
+          }
+  
+          System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
+          System.out.println("Total size of input topics names is " + topicNames.length);
+          Arrays.stream(topicNames).forEach(name -> System.out.println(new String(name)));
+          Map<String,byte[]> topicNameIdMap = metadataBatches.findTopicId(topicNames);
+          if (topicNameIdMap == null) {
+              System.out.println("topic names-ids map is null");
+              throw new ClusterMetadataException("topic names-ids map is null");
+          }
+        // Topics Array
+          // Length of array
+          responseBuffer.write(encodeVarInt(topicNames.length+1));
+          // Topics Array
+          for(byte[] topicName: topicNames) {
+              byte[] topicId = topicNameIdMap.get(new String(topicName));
+              byte[] topicsArray = generateTopicResponse(topicName, topicId, responsePartitionsLimit, metadataBatches);
+              responseBuffer.write(topicsArray);
+              System.out.println("Topics Array for name " + new String(topicName) + " is done. Size " + topicsArray.length);
+          }
+      // Next Cursor
+          responseBuffer.write(255);
+      // Tag Buffer
+          responseBuffer.write(tag_buffer);
     }
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
