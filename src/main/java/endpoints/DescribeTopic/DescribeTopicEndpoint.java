@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 
 import endpoints.KafkaEndpoint;
 import endpoints.DescribeTopic.models.MetadataBatches;
@@ -166,7 +167,6 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                 else {
                     System.out.println("Found partitions " + partitions.size());
                     partitions.sort(Comparator.comparing(p -> bytesToInt(p.partitionId)));
-                    System.out.println("after soring " + partitions.size());
                     // Array length (+1 size)
                     topicsArrayBuffer.write(encodeVarInt(partitions.size()+1));
                     partitions.forEach(partition -> {
@@ -181,27 +181,31 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                             topicsArrayBuffer.write(partition.leaderEpoch);
                             // Replica Nodes
                                 // array length
+                                System.out.println("Replica nodes count: " + partition.replicaArrayLength);
                                 topicsArrayBuffer.write(encodeVarInt(partition.replicaArrayLength));
                                 // replica ids
-                                Arrays.stream(partition.replicaArray).forEach(id -> {
+                                
+                                Optional.ofNullable(partition.replicaArray)
+                                    .ifPresent(array -> Arrays.stream(array).forEach(id -> {
                                     try {
                                         topicsArrayBuffer.write(id);
                                     } catch (IOException e) {
                                         System.out.println("failed to write replica array");
                                         e.printStackTrace();
                                     }
-                                });
+                                }));
                             // ISR Nodes
                                 // array length
                                 topicsArrayBuffer.write(encodeVarInt(partition.insyncReplicaArrayLength));
                                 // replica ids
-                                Arrays.stream(partition.insyncReplicaArray).forEach(id -> {
+                                Optional.ofNullable(partition.insyncReplicaArray)
+                                    .ifPresent(array -> Arrays.stream(array).forEach(id -> {
                                     try {
                                         topicsArrayBuffer.write(id);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                });
+                                }));
                             //TODO how to get these?
                             // Eligible Leader Replicas
                             topicsArrayBuffer.write(1);

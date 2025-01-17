@@ -162,13 +162,14 @@ public class ClusterMetadataReader {
             inputStream.read(partitionRecordValue.topicUUID);
 
             partitionRecordValue.replicaArrayLength = readUnsignedVarInt(inputStream);
-            System.out.println("replicaArrayLength size " + partitionRecordValue.replicaArrayLength);
+            System.out.println("replicaArrayLength " + partitionRecordValue.replicaArrayLength);
             if(partitionRecordValue.replicaArrayLength > 1){
                 byte[][] replicaArray = new byte[partitionRecordValue.replicaArrayLength-1][4];
                 for(int i=0; i<replicaArray.length; i++) {
                     inputStream.read(replicaArray[i]);
                 }
                 partitionRecordValue.replicaArray = replicaArray;
+                System.out.println("replicaArray size " + partitionRecordValue.replicaArray.length);
             }
             
             partitionRecordValue.insyncReplicaArrayLength = readUnsignedVarInt(inputStream);

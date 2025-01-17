@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MetadataBatches {
     public List<Batch> batchesArray = new ArrayList<>();
@@ -41,11 +40,9 @@ public class MetadataBatches {
     
     // TODO maybe relation of records within a batch is important. If I found topic record value, I can find based on that record other data?
     public ArrayList<PartitionRecordValue> findPartitions(byte[] topicId) {
-        System.out.println("Searching partitions for topic ID " + new String(topicId));
         if(batchesArray.size() > 0) {
                 ArrayList<PartitionRecordValue> partitions = new ArrayList<>();
                 for(Batch batch: batchesArray) {
-                    System.out.println("This batch has records: " + batch.records.length);
                     for(Record record: batch.records){
                         if(record.value.getClass()==PartitionRecordValue.class) {
                             PartitionRecordValue partitionRecordValue = (PartitionRecordValue) record.value;
@@ -58,7 +55,10 @@ public class MetadataBatches {
                 }
                 if(partitions.size()>0)
                     return partitions;
-                else return null;
+                else {
+                    System.out.println("Found no partitions");
+                    return null;
+                }
             }
         return null;
     }
