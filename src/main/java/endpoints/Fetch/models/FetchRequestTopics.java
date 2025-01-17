@@ -18,9 +18,11 @@ public class FetchRequestTopics {
             bodyStream.read(topicUUID);
             paritionsArrayLength = readUnsignedVarInt(bodyStream);
             System.out.println("paritionsArrayLength " + paritionsArrayLength);
-            paritions = new FetchRequestPartitions[paritionsArrayLength-1];
-            for(int i=0; i<paritions.length; i++) {
-                paritions[i] = new FetchRequestPartitions(bodyStream);
+            if (paritionsArrayLength > 1) {
+                paritions = new FetchRequestPartitions[paritionsArrayLength-1];
+                for(int i=0; i<paritions.length; i++) {
+                    paritions[i] = new FetchRequestPartitions(bodyStream);
+                }
             }
             // TAG_BUFFER
             bodyStream.read();

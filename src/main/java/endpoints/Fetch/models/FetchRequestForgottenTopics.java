@@ -17,9 +17,12 @@ public class FetchRequestForgottenTopics {
             System.out.println("Reading FetchRequestBody");
             bodyStream.read(topicUUID);
             paritionsArrayLength = readUnsignedVarInt(bodyStream);
-            paritions = new byte[paritionsArrayLength-1][4];
-            for(int i=0; i<paritions.length; i++) {
-                bodyStream.read(paritions[i]);
+            System.out.println("paritionsArrayLength " + paritionsArrayLength);
+            if (paritionsArrayLength > 1) {
+                paritions = new byte[paritionsArrayLength-1][4];
+                for(int i=0; i<paritions.length; i++) {
+                    bodyStream.read(paritions[i]);
+                }
             }
             // TAG_BUFFER
             bodyStream.read();

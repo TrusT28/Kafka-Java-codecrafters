@@ -32,21 +32,27 @@ public class FetchRequestBody {
             bodyStream.read(sessionEpoch);
             topicsArrayLength = readUnsignedVarInt(bodyStream);
             System.out.println("topicsArrayLength " + topicsArrayLength);
-            topics = new FetchRequestTopics[topicsArrayLength-1];
-            for(int i=0; i<topics.length; i++) {
-                topics[i] = new FetchRequestTopics(bodyStream);
+            if (topicsArrayLength > 1) {
+                topics = new FetchRequestTopics[topicsArrayLength-1];
+                for(int i=0; i<topics.length; i++) {
+                    topics[i] = new FetchRequestTopics(bodyStream);
+                }
             }
             forgottenTopicsArrayLength = readUnsignedVarInt(bodyStream);
             System.out.println("forgottenTopicsArrayLength " + forgottenTopicsArrayLength);
-            forgottenTopics = new FetchRequestForgottenTopics[forgottenTopicsArrayLength-1];
-            for(int i=0; i<forgottenTopics.length; i++) {
-                forgottenTopics[i] = new FetchRequestForgottenTopics(bodyStream);
+            if (forgottenTopicsArrayLength > 1) {
+                forgottenTopics = new FetchRequestForgottenTopics[forgottenTopicsArrayLength-1];
+                for(int i=0; i<forgottenTopics.length; i++) {
+                    forgottenTopics[i] = new FetchRequestForgottenTopics(bodyStream);
+                }
             }
             rackIdLength = readUnsignedVarInt(bodyStream);
             System.out.println("rackIdLength " + rackIdLength);
-            rackId = new byte[rackIdLength-1];
-            bodyStream.read(rackId);
-            System.out.println("rackId " + new String(rackId));
+            if(rackIdLength > 1) {
+                rackId = new byte[rackIdLength-1];
+                bodyStream.read(rackId);
+                System.out.println("rackId " + new String(rackId));
+            }
             // TAG_BUFFER
             bodyStream.read();
         }
