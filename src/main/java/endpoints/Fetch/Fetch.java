@@ -48,7 +48,6 @@ public class Fetch implements KafkaEndpoint{
 
                 // Prepare topic Ids - names
                 System.out.println("Reading metadata kafka file");
-                TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
                 ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
                 MetadataBatches metadataBatches;
                 try {
@@ -101,7 +100,12 @@ public class Fetch implements KafkaEndpoint{
                 responseBuffer.write(topic.topicUUID);
                 // Partitions Array
                 String topicName = topicIdNameMap.get(ByteBuffer.wrap(topic.topicUUID));
-                System.out.println("Its topicName is " + new String(topicName));
+                if(topicName==null) {
+                    System.out.println("topicName is null");
+                }
+                else {
+                    System.out.println("Its topicName is " + topicName);
+                }
 
                 byte[] partitionsResponse = writeTopicParitions(topic, topicName);
                 responseBuffer.write(partitionsResponse);
@@ -120,8 +124,15 @@ public class Fetch implements KafkaEndpoint{
     private byte[] writeTopicParitions(FetchRequestTopic topics, String topicName) throws IOException {
         ByteArrayOutputStream partitionsResponseBuffer = new ByteArrayOutputStream();
         byte tagBuffer = 0;
-        TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
-        boolean topicExists = topicMetadataReader.topicMetadataFileExists(topicName);
+        
+        boolean topicExists;
+        if (topicName!=null && !topicName.isEmpty()) {
+            TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
+            topicExists = topicMetadataReader.topicMetadataFileExists(topicName);
+        }
+        else {
+            topicExists = false;
+        }
 
         // Length
         partitionsResponseBuffer.write(encodeVarInt(2));
@@ -129,11 +140,11 @@ public class Fetch implements KafkaEndpoint{
         partitionsResponseBuffer.write(intToBytes(0));
         // Error code
         
-        if(!topicExists) {
-        partitionsResponseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
+        if(topicExists) {
+            partitionsResponseBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
         }
         else {
-            partitionsResponseBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+            partitionsResponseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
         }
         // high_watermark => INT64
         byte[] highWaterMark = new byte[8];
