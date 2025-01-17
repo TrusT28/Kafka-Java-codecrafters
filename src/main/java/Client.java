@@ -28,7 +28,6 @@ public class Client implements Runnable {
                     System.out.println("API in progress! " + this.hashCode());
                     api.processAPI(dataInputStream, outputStream);
                     System.out.println("API Processed! " + this.hashCode());
-                    break;
                 }
                 catch(EOFException e) {
                     System.err.println("EOF. Client closed connection." + e.getMessage() + " Hash " +  + this.hashCode());
