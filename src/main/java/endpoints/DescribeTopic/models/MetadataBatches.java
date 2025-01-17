@@ -27,7 +27,7 @@ public class MetadataBatches {
                             System.out.println("Found a match for " + new String(topicRecordValue.topicName));
                         }
                         else {
-                            System.out.println("This value does not match anything" + new String(topicRecordValue.topicName));
+                            System.out.println("This value does not match anything " + new String(topicRecordValue.topicName));
                         }
                     }
                 }
