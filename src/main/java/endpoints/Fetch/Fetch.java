@@ -22,11 +22,15 @@ public class Fetch implements KafkaEndpoint{
             if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 16) {
                 System.out.println("Handling a proper request");
                 byte[] errorCode = shortToBytes((short) ErrorCodes.NO_ERROR);
-                byte[] throttle_time_ms = intToBytes(100);
+                byte[] throttle_time_ms = intToBytes(0);
                 byte tag_buffer = 0;
 
                 // Send data to client
+                // Response Header
                 responseBuffer.write(requestBody.input_correlation_id);
+                responseBuffer.write(tag_buffer);
+
+                // Fetch Body
                 responseBuffer.write(throttle_time_ms);
                 responseBuffer.write(errorCode);
                 // Session Id

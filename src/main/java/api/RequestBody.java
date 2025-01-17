@@ -26,7 +26,7 @@ public class RequestBody {
 
                 int requestHeaderSize = input_request_api_key.length + input_request_api_version.length + input_correlation_id.length;
 
-                if(bytesToInt(input_request_api_key) != ApiCodes.API_VERSIONS_KEY) {
+                if(bytesToInt(input_request_api_key) == ApiCodes.DESCRIBE_TOPIC_KEY) {
                     dataInputStream.readFully(input_client_id_length);
                     input_client_id = new byte[bytesToInt(input_client_id_length)];
                     dataInputStream.readFully(input_client_id);
