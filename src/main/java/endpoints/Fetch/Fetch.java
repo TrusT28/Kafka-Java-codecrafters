@@ -29,7 +29,9 @@ public class Fetch implements KafkaEndpoint{
                 responseBuffer.write(errorCode);
                 responseBuffer.write(throttle_time_ms);
                 // Session Id
-                responseBuffer.write(0);
+                responseBuffer.write(intToBytes(0));
+                // Responses
+                
                 responseBuffer.write(tag_buffer);
             } else {
                 // Throw appropriate error code

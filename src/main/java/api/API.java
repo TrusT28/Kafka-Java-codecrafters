@@ -45,7 +45,7 @@ public class API {
                 break;
         }
         byte[] responseBytes = responseBuffer.toByteArray();
-        System.out.println("Final response is of size " + intToBytes(responseBytes.length));
+        System.out.println("Final response is of size " + responseBytes.length);
         // send data to client
         outputStream.write(intToBytes(responseBytes.length));
         outputStream.write(responseBytes);
