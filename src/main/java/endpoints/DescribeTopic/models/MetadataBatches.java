@@ -1,11 +1,15 @@
 package endpoints.DescribeTopic.models;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import utils.ClusterMetadataException;
 
 public class MetadataBatches {
     public List<Batch> batchesArray = new ArrayList<>();
@@ -62,5 +66,24 @@ public class MetadataBatches {
             }
         return null;
     }
+
+
+        public Map<ByteBuffer, String> getTopicIdNameMap() throws IOException {
+            if(batchesArray.size() > 0) {
+                Map<ByteBuffer, String> topicIdNameMap = new HashMap<>();
+                for(Batch batch: batchesArray) {
+                    System.out.println("This batch has records: " + batch.records.length);
+                    for(Record record: batch.records){
+                        if(record.value.getClass()==TopicRecordValue.class) {
+                            TopicRecordValue topicRecordValue = (TopicRecordValue) record.value;
+                            System.out.println("Found topic " + new String(topicRecordValue.topicName));
+                            topicIdNameMap.put(ByteBuffer.wrap(topicRecordValue.topicUUID), new String(topicRecordValue.topicName));
+                        }
+                    }
+                }
+                return topicIdNameMap;
+            }
+            return null;
+        }
 
 }

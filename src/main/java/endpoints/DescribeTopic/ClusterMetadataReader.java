@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.math.BigInteger;
 import org.apache.commons.io.FileUtils;
 
@@ -269,4 +270,5 @@ public class ClusterMetadataReader {
             }
             return featureLevelValue;
         }
-}
+
+    }
