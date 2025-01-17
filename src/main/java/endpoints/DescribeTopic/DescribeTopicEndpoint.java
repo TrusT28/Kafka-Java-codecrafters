@@ -150,6 +150,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             // Array length (+1 size)
             partitionsArrayBuffer.write(encodeVarInt(partitions.size()+1));
             for(PartitionRecordValue partition: partitions) {
+                    System.out.println("Writting for partition...");
                     // Error code
                     partitionsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
                     // Partition Id
@@ -192,9 +193,10 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                     partitionsArrayBuffer.write(1);
                     // Tag Buffer
                     partitionsArrayBuffer.write(tagBuffer);
+                    System.out.println("Done for partition...");
             };
+            System.out.println("Done for all partitions");
         }
-
         return partitionsArrayBuffer.toByteArray();
     }
 
@@ -229,6 +231,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             System.out.println("topicID exists");
             // Error Code
             topicsArrayBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+            System.out.println("Debug. No Error is of size " + shortToBytes(ErrorCodes.NO_ERROR).length);
             // Topic Name
                 // String Length
                 int nameLength = topicName.length+1;
@@ -242,12 +245,18 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             topicsArrayBuffer.write(0);
             // Partitions Array
             byte[] parittionsArray = generatePartitionsArray(topicId, partitionsLimit, metadataBatches);
+            System.out.println("outside - Done for all partitions");
             topicsArrayBuffer.write(parittionsArray);
         }
-
+        System.out.println("Wrote variable part of topic array response");
         // Topic Authorized Operations
-        byte[] authorizedOperations = {0,0,0,0,1,1,0,1,1,1,1,1,1,0,0,0};
+        byte[] authorizedOperations = {(byte) 0x00, 
+            (byte) 0x00, 
+            (byte) 0x0D, 
+            (byte) 0xF8
+        };
         topicsArrayBuffer.write(authorizedOperations);
+        System.out.println("Wrote authorizedOperations: " + authorizedOperations.length + " " + Arrays.toString(authorizedOperations));
         // Tag Buffer
         topicsArrayBuffer.write(tag_buffer);
         return topicsArrayBuffer.toByteArray();
