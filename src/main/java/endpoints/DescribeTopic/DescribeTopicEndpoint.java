@@ -13,11 +13,7 @@ import utils.ErrorCodes;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import endpoints.KafkaEndpoint;
 import endpoints.DescribeTopic.models.MetadataBatches;
@@ -42,7 +38,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                     System.out.println("Input topics size " + topicNamesArraySize);
                     // Topics Array
                     byte[][] topicNames = new byte[topicNamesArraySize-1][];
-                    for(int i=0; i<topicNames.length; i++) {
+                    for(int i=topicNames.length-1; i>=0; i--) {
                         topicNames[i] = readTopicName(bodyStream);
                     }
 
@@ -119,9 +115,9 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
     }
 
     private byte[] readTopicName(ByteArrayInputStream topic) throws IOException{
-        int topic_name_length = readUnsignedVarInt(topic);
-        if(topic_name_length > 1) {
-            byte[] topic_name = new byte[topic_name_length-1];
+        int topicNameLength = readUnsignedVarInt(topic);
+        if(topicNameLength > 1) {
+            byte[] topic_name = new byte[topicNameLength-1];
             topic.read(topic_name);
             // Tag Buffer
             topic.read();
