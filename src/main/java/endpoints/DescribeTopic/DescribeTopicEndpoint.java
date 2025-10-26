@@ -92,7 +92,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
               throw e;
           }
 
-        System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
+          System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
           System.out.println("Total size of input topics names is " + topicNames.length);
           Arrays.stream(topicNames).forEach(name -> System.out.println(new String(name)));
           Map<String,byte[]> topicNameIdMap = metadataBatches.findTopicId(topicNames);
@@ -104,7 +104,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
           // Length of array
           responseBuffer.write(encodeVarInt(topicNames.length+1));
           // Topics Array
-        for (int i = 0; i < topicNames.length; i++) {
+         for (int i = 0; i < topicNames.length; i++) {
             byte[] topicName = topicNames[i];
             byte[] topicId = topicNameIdMap.get(new String(topicName));
             System.out.println("Name,ID:" + new String(topicName) + "," + Arrays.toString(topicId));
