@@ -92,9 +92,9 @@ public class FetchEndpoint implements KafkaEndpoint{
         responseBuffer.write(intToBytes(0));
         // Responses
         System.out.println("Response length is " + requestBody.topicsArrayLength);
+        // Responses Length
+        responseBuffer.write(encodeVarInt(requestBody.topicsArrayLength));
         if(requestBody.topicsArrayLength>1) {
-            // Responses Length
-            responseBuffer.write(encodeVarInt(requestBody.topicsArrayLength));
             for(FetchRequestTopic topic : requestBody.topics) {
                 System.out.println("Writing for topic id " + Arrays.toString(topic.topicUUID));
                 // Topic ID
@@ -110,15 +110,10 @@ public class FetchEndpoint implements KafkaEndpoint{
 
                 byte[] partitionsResponse = writeTopicPartitions(topic, topicName);
                 responseBuffer.write(partitionsResponse);
-                // Tag Buffer
-                responseBuffer.write(tag_buffer);
             }
         }
-        else {
-            // Responses length 0
-            System.out.println("Response length was 0");
-            responseBuffer.write(encodeVarInt(0));
-        }
+        // Tag Buffer
+        responseBuffer.write(tag_buffer);
         responseBuffer.write(tag_buffer);
     }
 
@@ -167,7 +162,6 @@ public class FetchEndpoint implements KafkaEndpoint{
         partitionsResponseBuffer.write(preferredReadReplica);
         // records => COMPACT_RECORDS
         if(topicExists) {
-            // TODO Actually parse the file and count records
             byte[] topicRecords = topicMetadataReader.readTopicRecords(topicName);
             partitionsResponseBuffer.write(encodeVarInt(topicRecords.length+1));
             partitionsResponseBuffer.write(topicRecords);
