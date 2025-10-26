@@ -28,9 +28,9 @@ import endpoints.DescribeTopic.models.Value;
 
 public class ClusterMetadataReader {
     
-        public MetadataBatches parseClusterMetadataFile(String topicName, int partitionId) throws IOException {
+        public MetadataBatches parseClusterMetadataFile() throws IOException {
             System.out.println("Parsing cluster metadata file");
-            String fileName = "/tmp/kraft-combined-logs/" + topicName + "-" + partitionId + "/00000000000000000000.log";
+            String fileName = "/tmp/kraft-combined-logs/__cluster_metadata-0/00000000000000000000.log";
             File file = new File(fileName);
             System.out.println("File exists? " + file.exists());
             System.out.println("File total length: " + file.length());

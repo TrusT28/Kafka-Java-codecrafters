@@ -46,20 +46,22 @@ public class FetchEndpoint implements KafkaEndpoint{
                 }
 
                 // Prepare topic Ids - names
-                System.out.println("Reading metadata kafka file");
-                ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
-                MetadataBatches metadataBatches;
-                try {
-                    metadataBatches = clusterMetadataReader.parseClusterMetadataFile(fetchRequestBody.topics[0].topicUUID);
-                }
-                catch(IOException e) {
-                    System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
-                    throw e;
-                }
-                System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
-                Map<ByteBuffer, String> topicIdNameMap = metadataBatches.getTopicIdNameMap();
-                if (topicIdNameMap == null) {
-                    System.out.println("topic names-ids map is null");
+                Map<ByteBuffer, String> topicIdNameMap = null;
+                if(fetchRequestBody.topics.length>0) {
+                    System.out.println("Reading metadata kafka file");
+                    ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
+                    MetadataBatches metadataBatches;
+                    try {
+                        metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
+                    } catch (IOException e) {
+                        System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
+                        throw e;
+                    }
+                    System.out.println("Done reading metadata kafka file. batches:" + metadataBatches.batchesArray.size());
+                    topicIdNameMap = metadataBatches.getTopicIdNameMap();
+                    if (topicIdNameMap == null) {
+                        System.out.println("topic names-ids map is null");
+                    }
                 }
 
                 // Write response

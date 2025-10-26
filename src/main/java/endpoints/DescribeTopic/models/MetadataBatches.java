@@ -15,7 +15,7 @@ public class MetadataBatches {
     public List<Batch> batchesArray = new ArrayList<>();
 
     public Map<String,byte[]> findTopicId(byte[][] topicNames) {
-        if(batchesArray.size() > 0) {
+        if(!batchesArray.isEmpty()) {
             Map<String,byte[]> topicNameIdMap = new HashMap<>();
             for(Batch batch: batchesArray) {
                 System.out.println("This batch has records: " + batch.records.length);
@@ -44,7 +44,7 @@ public class MetadataBatches {
     
     // TODO maybe relation of records within a batch is important. If I found topic record value, I can find based on that record other data?
     public ArrayList<PartitionRecordValue> findPartitions(byte[] topicId) {
-        if(batchesArray.size() > 0) {
+        if(!batchesArray.isEmpty()) {
                 ArrayList<PartitionRecordValue> partitions = new ArrayList<>();
                 for(Batch batch: batchesArray) {
                     for(Record record: batch.records){
@@ -57,7 +57,7 @@ public class MetadataBatches {
                         }
                     }
                 }
-                if(partitions.size()>0)
+                if(!partitions.isEmpty())
                     return partitions;
                 else {
                     System.out.println("Found no partitions");
@@ -69,7 +69,7 @@ public class MetadataBatches {
 
 
         public Map<ByteBuffer, String> getTopicIdNameMap() throws IOException {
-            if(batchesArray.size() > 0) {
+            if(!batchesArray.isEmpty()) {
                 Map<ByteBuffer, String> topicIdNameMap = new HashMap<>();
                 for(Batch batch: batchesArray) {
                     System.out.println("This batch has records: " + batch.records.length);
