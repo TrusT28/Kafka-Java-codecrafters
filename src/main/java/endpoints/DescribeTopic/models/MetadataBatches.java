@@ -18,7 +18,7 @@ public class MetadataBatches {
         if(!batchesArray.isEmpty()) {
             Map<String,byte[]> topicNameIdMap = new HashMap<>();
             for(Batch batch: batchesArray) {
-                System.out.println("This batch has records: " + batch.records.length);
+                System.out.println("This batch has records: " + batch.records.size());
                 for(Record record: batch.records){
                     if(topicNameIdMap.size() == topicNames.length) {
                         return topicNameIdMap;
@@ -72,7 +72,7 @@ public class MetadataBatches {
             if(!batchesArray.isEmpty()) {
                 Map<ByteBuffer, String> topicIdNameMap = new HashMap<>();
                 for(Batch batch: batchesArray) {
-                    System.out.println("This batch has records: " + batch.records.length);
+                    System.out.println("This batch has records: " + batch.records.size());
                     for(Record record: batch.records){
                         if(record.value.getClass()==TopicRecordValue.class) {
                             TopicRecordValue topicRecordValue = (TopicRecordValue) record.value;
