@@ -47,7 +47,7 @@ public class FetchEndpoint implements KafkaEndpoint{
 
                 // Prepare topic Ids - names
                 Map<ByteBuffer, String> topicIdNameMap = null;
-                if(fetchRequestBody.topics.length>0) {
+                if(fetchRequestBody.topics != null && fetchRequestBody.topics.length>0) {
                     System.out.println("Reading metadata kafka file");
                     ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
                     MetadataBatches metadataBatches;
