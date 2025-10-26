@@ -103,13 +103,14 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
           // Length of array
           responseBuffer.write(encodeVarInt(topicNames.length+1));
           // Topics Array
-          for(byte[] topicName: topicNames) {
-              byte[] topicId = topicNameIdMap.get(new String(topicName));
-              System.out.println("Name,ID:" + new String(topicName) + "," + Arrays.toString(topicId));
-              byte[] topicsArray = generateTopicResponse(topicName, topicId, responsePartitionsLimit, metadataBatches);
-              responseBuffer.write(topicsArray);
-              System.out.println("Topics Array for name " + new String(topicName) + " is done. Size " + topicsArray.length);
-          }
+        for (int i = 0; i < topicNames.length; i++) {
+            byte[] topicName = topicNames[i];
+            byte[] topicId = topicNameIdMap.get(new String(topicName));
+            System.out.println("Name,ID:" + new String(topicName) + "," + Arrays.toString(topicId));
+            byte[] topicsArray = generateTopicResponse(topicName, topicId, responsePartitionsLimit, metadataBatches);
+            responseBuffer.write(topicsArray);
+            System.out.println("Topics Array for name " + new String(topicName) + " is done. Size " + topicsArray.length);
+        }
       // Next Cursor
           responseBuffer.write(255);
       // Tag Buffer
@@ -203,7 +204,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
     private byte[] generateTopicResponse(byte[] topicName, byte[] topicId, int partitionsLimit, MetadataBatches metadataBatches) throws IOException, ClusterMetadataException{
         ByteArrayOutputStream topicsArrayBuffer = new ByteArrayOutputStream();
         byte tag_buffer = 0;
-        System.out.println("Writting response for topic name: " + new String(topicName));
+        System.out.println("Writing response for topic name: " + new String(topicName));
 
         if(topicId == null) {
             System.out.println("topicID is null");
@@ -244,9 +245,9 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             // Is Internal
             topicsArrayBuffer.write(0);
             // Partitions Array
-            byte[] parittionsArray = generatePartitionsArray(topicId, partitionsLimit, metadataBatches);
+            byte[] partitionsArray = generatePartitionsArray(topicId, partitionsLimit, metadataBatches);
             System.out.println("outside - Done for all partitions");
-            topicsArrayBuffer.write(parittionsArray);
+            topicsArrayBuffer.write(partitionsArray);
         }
         System.out.println("Wrote variable part of topic array response");
         // Topic Authorized Operations
