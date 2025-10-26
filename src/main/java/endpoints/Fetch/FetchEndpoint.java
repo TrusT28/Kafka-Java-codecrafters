@@ -5,7 +5,6 @@ import static utils.Utils.encodeVarInt;
 import static utils.Utils.intToBytes;
 import static utils.Utils.shortToBytes;
 
-import utils.ClusterMetadataException;
 import utils.ConstructorException;
 import utils.ErrorCodes;
 
@@ -23,7 +22,7 @@ import endpoints.DescribeTopic.models.MetadataBatches;
 import endpoints.Fetch.models.FetchRequestBody;
 import endpoints.Fetch.models.FetchRequestTopic;
 
-public class Fetch implements KafkaEndpoint{
+public class FetchEndpoint implements KafkaEndpoint{
 
     @Override
     public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException {
@@ -64,7 +63,7 @@ public class Fetch implements KafkaEndpoint{
                 }
 
                 // Write response
-                System.out.println("Writting Fetch response");
+                System.out.println("Writing Fetch response");
                 // Response Header
                 responseBuffer.write(requestBody.input_correlation_id);
                 responseBuffer.write(tag_buffer);

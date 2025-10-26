@@ -7,16 +7,17 @@ import java.io.OutputStream;
 
 import endpoints.ApiVersions.ApiVersionsEndpoint;
 import endpoints.DescribeTopic.DescribeTopicEndpoint;
-import endpoints.Fetch.Fetch;
+import endpoints.Fetch.FetchEndpoint;
 import utils.ConstructorException;
 
 import static utils.Utils.*;
 
 public class API {
-    private ApiMetadata[] SUPPORTED_APIs = {
+    private final ApiMetadata[] SUPPORTED_APIs = {
         new ApiMetadata(ApiCodes.API_VERSIONS_KEY, 0,4), 
         new ApiMetadata(ApiCodes.DESCRIBE_TOPIC_KEY,0,0),
-        new ApiMetadata(ApiCodes.FETCH_KEY, 0, 16)
+        new ApiMetadata(ApiCodes.FETCH_KEY, 0, 16),
+        new ApiMetadata(ApiCodes.PRODUCE_KEY, 0, 16)
     };
 
     // TODO make sure input stream is handled well, output stream too. No IO or EOF. readFully causes this.
@@ -38,8 +39,8 @@ public class API {
                 break;
             case ApiCodes.FETCH_KEY:
                 System.out.println("Fetch request");
-                Fetch fetch = new Fetch();
-                fetch.process(requestBody, responseBuffer);
+                FetchEndpoint fetchEndpoint = new FetchEndpoint();
+                fetchEndpoint.process(requestBody, responseBuffer);
                 break;
             default:
                 break;

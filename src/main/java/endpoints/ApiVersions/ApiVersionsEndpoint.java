@@ -34,10 +34,10 @@ public class ApiVersionsEndpoint implements KafkaEndpoint{
                 responseBuffer.write(errorCode);
                 responseBuffer.write(apiKeysArrayDefinition);
 
-                for(int i=0; i<SUPPORTED_APIs.length; i++) {
-                    byte[] apiKey = shortToBytes((short) SUPPORTED_APIs[i].key);
-                    byte[] minVersion = shortToBytes((short) SUPPORTED_APIs[i].minVersion);
-                    byte[] maxVersion = shortToBytes((short) SUPPORTED_APIs[i].maxVersion);
+                for (ApiMetadata supportedApi : SUPPORTED_APIs) {
+                    byte[] apiKey = shortToBytes((short) supportedApi.key);
+                    byte[] minVersion = shortToBytes((short) supportedApi.minVersion);
+                    byte[] maxVersion = shortToBytes((short) supportedApi.maxVersion);
                     responseBuffer.write(apiKey);
                     responseBuffer.write(minVersion);
                     responseBuffer.write(maxVersion);
