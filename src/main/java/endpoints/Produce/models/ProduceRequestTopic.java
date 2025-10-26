@@ -13,7 +13,7 @@ public class ProduceRequestTopic {
     public int topicNameLength; //The length of the string + 1, unsigned varint
     public byte[] topicName = null; // size is topicNameLength
     public int partitionsArrayLength; //The length of the partitions array + 1, unsigned varint
-    public ArrayList<ProduceRequestPartition> partitionsArray;
+    public ArrayList<ProduceRequestPartition> partitionsArray = new ArrayList<>();
 
     public ProduceRequestTopic(ByteArrayInputStream bodyStream) throws ConstructorException {
         try {

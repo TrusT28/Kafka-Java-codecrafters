@@ -13,7 +13,7 @@ public class ProduceRequestBody {
     public byte[] requiredACK = new byte[2]; //integer representing the number of acknowledgments. -1 means all-sync replicas must ack
     public byte[] timeout = new byte[4]; //time to await a response in milliseconds.
     public int topicsArrayLength; //The length of the topics array + 1, encoded as an unsigned varint
-    public ArrayList<ProduceRequestTopic> topics;
+    public ArrayList<ProduceRequestTopic> topics = new ArrayList<>();
 
     public ProduceRequestBody(ByteArrayInputStream bodyStream) throws ConstructorException {
         try {

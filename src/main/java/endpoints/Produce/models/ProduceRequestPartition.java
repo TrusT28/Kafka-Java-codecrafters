@@ -12,7 +12,7 @@ import static utils.NumbersUtils.readUnsignedVarInt;
 public class ProduceRequestPartition {
     public byte[] partitionId = new byte[4];
     public int recordBatchSize; //The length of the record batch + 1 encoded as an unsigned varint
-    public ArrayList<Batch> batches;
+    public ArrayList<Batch> batches = new ArrayList<>();
 
     public ProduceRequestPartition(ByteArrayInputStream bodyStream) throws ConstructorException {
         try {

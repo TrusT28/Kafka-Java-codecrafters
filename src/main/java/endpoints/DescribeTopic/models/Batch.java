@@ -22,7 +22,7 @@ public class Batch {
     public byte[] producerEpoch = new byte[2];
     public byte[] baseSequence = new byte[4];
     public byte[] amountOfRecords = new byte[4];
-    public ArrayList<Record> records;
+    public ArrayList<Record> records = new ArrayList<>();
 
     public Batch(ByteArrayInputStream inputStream) throws ConstructorException {
         try {
