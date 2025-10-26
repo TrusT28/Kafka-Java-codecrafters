@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import endpoints.ApiVersions.ApiVersionsEndpoint;
 import endpoints.DescribeTopic.DescribeTopicEndpoint;
 import endpoints.Fetch.FetchEndpoint;
+import endpoints.Produce.ProduceEndpoint;
 import utils.ConstructorException;
 
 import static utils.NumbersUtils.*;
@@ -41,6 +42,11 @@ public class API {
                 System.out.println("Fetch request");
                 FetchEndpoint fetchEndpoint = new FetchEndpoint();
                 fetchEndpoint.process(requestBody, responseBuffer);
+                break;
+            case ApiCodes.PRODUCE_KEY:
+                System.out.println("Produce request");
+                ProduceEndpoint produceEndpoint = new ProduceEndpoint();
+                produceEndpoint.process(requestBody, responseBuffer);
                 break;
             default:
                 break;
