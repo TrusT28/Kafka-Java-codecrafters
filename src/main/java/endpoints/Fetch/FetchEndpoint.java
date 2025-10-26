@@ -86,7 +86,7 @@ public class FetchEndpoint implements KafkaEndpoint{
 
         responseBuffer.write(throttle_time_ms);
         responseBuffer.write(errorCode);
-        // Session Id
+        // Session id
         responseBuffer.write(intToBytes(0));
         // Responses
         System.out.println("Response length is " + requestBody.topicsArrayLength);
@@ -166,7 +166,7 @@ public class FetchEndpoint implements KafkaEndpoint{
         if(topicExists) {
             // TODO Actually parse the file and count records
             byte[] topicRecords = topicMetadataReader.readTopicRecords(topicName);
-            partitionsResponseBuffer.write(encodeVarInt(2));
+            partitionsResponseBuffer.write(encodeVarInt(topicRecords.length));
             partitionsResponseBuffer.write(topicRecords);
         }
         else {
