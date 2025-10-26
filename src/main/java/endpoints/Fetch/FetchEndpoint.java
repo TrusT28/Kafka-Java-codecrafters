@@ -168,6 +168,7 @@ public class FetchEndpoint implements KafkaEndpoint{
             byte[] topicRecords = topicMetadataReader.readTopicRecords(topicName);
             partitionsResponseBuffer.write(encodeVarInt(topicRecords.length));
             partitionsResponseBuffer.write(topicRecords);
+            partitionsResponseBuffer.write(tagBuffer);
         }
         else {
             partitionsResponseBuffer.write(encodeVarInt(0));

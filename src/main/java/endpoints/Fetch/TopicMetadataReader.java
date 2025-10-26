@@ -3,6 +3,7 @@ package endpoints.Fetch;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 
