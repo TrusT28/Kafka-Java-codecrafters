@@ -55,13 +55,13 @@ public class ProduceEndpoint implements KafkaEndpoint {
                     // TODO This is hardcoded for now, we should detect real error
                     responseBuffer.write(shortToBytes((short) ErrorCodes.UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE));
                     // Base offset
-                    byte[] baseOffset = new byte[8];
+                    byte[] baseOffset = longToBytes(-1);
                     responseBuffer.write(baseOffset);
                     // Log append time
-                    byte[] logAppendTimeMs = new byte[8];
+                    byte[] logAppendTimeMs = longToBytes(-1);
                     responseBuffer.write(logAppendTimeMs);
                     // log_start_offset
-                    byte[] logStartOffset = new byte[8];
+                    byte[] logStartOffset = longToBytes(-1);
                     responseBuffer.write(logStartOffset);
                     // Record Errors Array Length
                     responseBuffer.write(0);

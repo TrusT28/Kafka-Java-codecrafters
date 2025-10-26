@@ -29,6 +29,10 @@ public class NumbersUtils {
       return ByteBuffer.allocate(4).putInt(value).array();
   }
 
+    public static byte[] longToBytes(long value) {
+        System.out.println("longToBytes " + value);
+        return ByteBuffer.allocate(8).putLong(value).array();
+    }
   
   // Helper method to read a variable-length integer.
   public static int readUnsignedVarInt(InputStream inputStream) throws IOException {
