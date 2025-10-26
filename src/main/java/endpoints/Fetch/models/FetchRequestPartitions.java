@@ -6,7 +6,7 @@ import java.io.InputStream;
 import utils.ConstructorException;
 
 public class FetchRequestPartitions {
-    public byte[] parition = new byte[4];
+    public byte[] paritionId = new byte[4];
     public byte[] currentLeaderEpoch = new byte[4];
     public byte[] fetchOffset = new byte[8];
     public byte[] lastFetchedEpoch = new byte[4];
@@ -16,7 +16,7 @@ public class FetchRequestPartitions {
     public FetchRequestPartitions(InputStream bodyStream) throws ConstructorException {
         try {
             System.out.println("Reading FetchRequestPartitions");
-            bodyStream.read(parition);
+            bodyStream.read(paritionId);
             bodyStream.read(currentLeaderEpoch);
             bodyStream.read(fetchOffset);
             bodyStream.read(lastFetchedEpoch);
@@ -24,6 +24,7 @@ public class FetchRequestPartitions {
             bodyStream.read(partitionMaxBytes);
             // TAG BUFFER
             bodyStream.read();
+            System.out.println("FetchRequestPartitions: "+ this);
         }
         catch(IOException e) {
             throw new ConstructorException(e.getMessage());

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.math.BigInteger;
+
+import endpoints.Fetch.models.FetchRequestBody;
 import org.apache.commons.io.FileUtils;
 
 import endpoints.DescribeTopic.models.Batch;
@@ -26,9 +28,9 @@ import endpoints.DescribeTopic.models.Value;
 
 public class ClusterMetadataReader {
     
-        public MetadataBatches parseClusterMetadataFile() throws IOException {
+        public MetadataBatches parseClusterMetadataFile(String topicName, int partitionId) throws IOException {
             System.out.println("Parsing cluster metadata file");
-            String fileName = "/tmp/kraft-combined-logs/__cluster_metadata-0/00000000000000000000.log";
+            String fileName = "/tmp/kraft-combined-logs/" + topicName + "-" + partitionId + "/00000000000000000000.log";
             File file = new File(fileName);
             System.out.println("File exists? " + file.exists());
             System.out.println("File total length: " + file.length());
@@ -105,7 +107,7 @@ public class ClusterMetadataReader {
             }
             record.valueLength = readSignedVarInt(inputStream);
             System.out.println("This valueLength is " + record.valueLength);
-            if(record.valueLength != -1 || record.valueLength > 0 ){
+            if(record.valueLength != -1){
                 record.value = readValue(inputStream, record.valueLength);
             }
 
@@ -167,8 +169,8 @@ public class ClusterMetadataReader {
             System.out.println("replicaArrayLength " + partitionRecordValue.replicaArrayLength);
             if(partitionRecordValue.replicaArrayLength > 1){
                 byte[][] replicaArray = new byte[partitionRecordValue.replicaArrayLength-1][4];
-                for(int i=0; i<replicaArray.length; i++) {
-                    inputStream.read(replicaArray[i]);
+                for (byte[] bytes : replicaArray) {
+                    inputStream.read(bytes);
                 }
                 partitionRecordValue.replicaArray = replicaArray;
                 System.out.println("replicaArray size " + partitionRecordValue.replicaArray.length);
@@ -178,8 +180,8 @@ public class ClusterMetadataReader {
             System.out.println("insyncReplicaArrayLength size " + partitionRecordValue.insyncReplicaArrayLength);
             if(partitionRecordValue.insyncReplicaArrayLength > 1){
                 byte[][] insyncReplicaArray = new byte[partitionRecordValue.insyncReplicaArrayLength-1][4];
-                for(int i=0; i<insyncReplicaArray.length; i++) {
-                    inputStream.read(insyncReplicaArray[i]);
+                for (byte[] bytes : insyncReplicaArray) {
+                    inputStream.read(bytes);
                 }
                 partitionRecordValue.insyncReplicaArray = insyncReplicaArray;
             }
@@ -188,8 +190,8 @@ public class ClusterMetadataReader {
             System.out.println("removingReplicaArrayLength size " + partitionRecordValue.removingReplicaArrayLength);
             if(partitionRecordValue.removingReplicaArrayLength>1){
                 byte[][] removingReplicaArray = new byte[partitionRecordValue.removingReplicaArrayLength-1][4];
-                for(int i=0; i<removingReplicaArray.length; i++) {
-                    inputStream.read(removingReplicaArray[i]);
+                for (byte[] bytes : removingReplicaArray) {
+                    inputStream.read(bytes);
                 }
                 partitionRecordValue.removingReplicaArray = removingReplicaArray;
             }
@@ -198,8 +200,8 @@ public class ClusterMetadataReader {
             System.out.println("addingReplicaArrayLength size " + partitionRecordValue.addingReplicaArrayLength);
             if(partitionRecordValue.addingReplicaArrayLength > 1){
                 byte[][] addingReplicaArray = new byte[partitionRecordValue.addingReplicaArrayLength-1][4];
-                for(int i=0; i<addingReplicaArray.length; i++) {
-                    inputStream.read(addingReplicaArray[i]);
+                for (byte[] bytes : addingReplicaArray) {
+                    inputStream.read(bytes);
                 }
                 partitionRecordValue.addingReplicaArray = addingReplicaArray;
             }
@@ -212,8 +214,8 @@ public class ClusterMetadataReader {
             System.out.println("directoriesArrayLength size " + partitionRecordValue.directoriesArrayLength);
             if(partitionRecordValue.directoriesArrayLength > 1){
                 byte[][] directoriesArray = new byte[partitionRecordValue.directoriesArrayLength-1][16];
-                for(int i=0; i<directoriesArray.length; i++) {
-                    inputStream.read(directoriesArray[i]);
+                for (byte[] bytes : directoriesArray) {
+                    inputStream.read(bytes);
                 }
                 partitionRecordValue.directoriesArray = directoriesArray;
             }
@@ -237,6 +239,7 @@ public class ClusterMetadataReader {
                 byte[] name = new byte[topicRecordValue.nameLength-1];
                 inputStream.read(name);
                 topicRecordValue.topicName = name;
+                System.out.println("topic Name is " + Arrays.toString(topicRecordValue.topicName));
             }
             inputStream.read(topicRecordValue.topicUUID);
             System.out.println("Found Topic,Id: " + new String(topicRecordValue.topicName) + "," + Arrays.toString(topicRecordValue.topicUUID));

@@ -50,7 +50,7 @@ public class FetchEndpoint implements KafkaEndpoint{
                 ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
                 MetadataBatches metadataBatches;
                 try {
-                    metadataBatches = clusterMetadataReader.parseClusterMetadataFile();
+                    metadataBatches = clusterMetadataReader.parseClusterMetadataFile(fetchRequestBody.topics[0].topicUUID);
                 }
                 catch(IOException e) {
                     System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
@@ -94,7 +94,7 @@ public class FetchEndpoint implements KafkaEndpoint{
             // Responses Length
             responseBuffer.write(encodeVarInt(requestBody.topicsArrayLength));
             for(FetchRequestTopic topic : requestBody.topics) {
-                System.out.println("Writting for topic id " + Arrays.toString(topic.topicUUID));
+                System.out.println("Writing for topic id " + Arrays.toString(topic.topicUUID));
                 // Topic ID
                 responseBuffer.write(topic.topicUUID);
                 // Partitions Array
@@ -106,7 +106,7 @@ public class FetchEndpoint implements KafkaEndpoint{
                     System.out.println("Its topicName is " + topicName);
                 }
 
-                byte[] partitionsResponse = writeTopicParitions(topic, topicName);
+                byte[] partitionsResponse = writeTopicPartitions(topic, topicName);
                 responseBuffer.write(partitionsResponse);
                 // Tag Buffer
                 responseBuffer.write(tag_buffer);
@@ -120,7 +120,7 @@ public class FetchEndpoint implements KafkaEndpoint{
         responseBuffer.write(tag_buffer);
     }
 
-    private byte[] writeTopicParitions(FetchRequestTopic topics, String topicName) throws IOException {
+    private byte[] writeTopicPartitions(FetchRequestTopic topic, String topicName) throws IOException {
         ByteArrayOutputStream partitionsResponseBuffer = new ByteArrayOutputStream();
         TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
         byte tagBuffer = 0;
@@ -128,6 +128,7 @@ public class FetchEndpoint implements KafkaEndpoint{
         boolean topicExists;
         if (topicName!=null && !topicName.isEmpty()) {
             topicExists = topicMetadataReader.topicMetadataFileExists(topicName);
+            System.out.println("Topic exists: " + topicExists);
         }
         else {
             topicExists = false;
