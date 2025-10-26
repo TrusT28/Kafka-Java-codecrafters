@@ -166,9 +166,8 @@ public class FetchEndpoint implements KafkaEndpoint{
         if(topicExists) {
             // TODO Actually parse the file and count records
             byte[] topicRecords = topicMetadataReader.readTopicRecords(topicName);
-            partitionsResponseBuffer.write(encodeVarInt(topicRecords.length));
+            partitionsResponseBuffer.write(encodeVarInt(topicRecords.length+1));
             partitionsResponseBuffer.write(topicRecords);
-            partitionsResponseBuffer.write(tagBuffer);
         }
         else {
             partitionsResponseBuffer.write(encodeVarInt(0));
