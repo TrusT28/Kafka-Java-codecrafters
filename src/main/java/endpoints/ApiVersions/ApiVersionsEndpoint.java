@@ -1,8 +1,8 @@
 package endpoints.ApiVersions;
 
-import static utils.Utils.bytesToInt;
-import static utils.Utils.intToBytes;
-import static utils.Utils.shortToBytes;
+import static utils.NumbersUtils.bytesToInt;
+import static utils.NumbersUtils.intToBytes;
+import static utils.NumbersUtils.shortToBytes;
 import utils.ErrorCodes;
 
 import java.io.ByteArrayOutputStream;

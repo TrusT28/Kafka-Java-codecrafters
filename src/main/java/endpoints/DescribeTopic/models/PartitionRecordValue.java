@@ -1,5 +1,12 @@
 package endpoints.DescribeTopic.models;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+
+import static utils.NumbersUtils.bytesToInt;
+import static utils.NumbersUtils.readUnsignedVarInt;
+
 public class PartitionRecordValue extends Value {
     public byte[] frameVersion = new byte[1];
     public byte[] type = new byte[1];
@@ -27,4 +34,77 @@ public class PartitionRecordValue extends Value {
     // unsigned varint
     public int taggedFieldsCount;
     public byte[] taggedFields = null;
+
+    public PartitionRecordValue(InputStream inputStream) throws IOException {
+        System.out.println("Reading Partition Record Value");
+        inputStream.read(partitionId);
+        inputStream.read(topicUUID);
+        System.out.println("Found PartitionId,TopicId: " + bytesToInt(partitionId) + "," + Arrays.toString(topicUUID));
+        replicaArrayLength = readUnsignedVarInt(inputStream);
+        System.out.println("replicaArrayLength " + replicaArrayLength);
+        if(replicaArrayLength > 1){
+            replicaArray = new byte[replicaArrayLength-1][4];
+            for (int i = 0; i < replicaArray.length; i++) {
+                byte[] bytes = new byte[4];
+                inputStream.read(bytes);
+                replicaArray[i] = bytes;
+            }
+            System.out.println("replicaArray size " + replicaArray.length);
+        }
+
+        insyncReplicaArrayLength = readUnsignedVarInt(inputStream);
+        System.out.println("insyncReplicaArrayLength size " + insyncReplicaArrayLength);
+        if(insyncReplicaArrayLength > 1){
+            insyncReplicaArray = new byte[insyncReplicaArrayLength-1][4];
+            for (int i = 0; i < insyncReplicaArray.length; i++) {
+                byte[] bytes = new byte[4];
+                inputStream.read(bytes);
+                insyncReplicaArray[i] = bytes;
+            }
+        }
+
+        removingReplicaArrayLength = readUnsignedVarInt(inputStream);
+        System.out.println("removingReplicaArrayLength size " + removingReplicaArrayLength);
+        if(removingReplicaArrayLength>1){
+            removingReplicaArray = new byte[removingReplicaArrayLength-1][4];
+            for (int i = 0; i < removingReplicaArray.length; i++) {
+                byte[] bytes = new byte[4];
+                inputStream.read(bytes);
+                removingReplicaArray[i] = bytes;
+            }
+        }
+
+        addingReplicaArrayLength = readUnsignedVarInt(inputStream);
+        System.out.println("addingReplicaArrayLength size " + addingReplicaArrayLength);
+        if(addingReplicaArrayLength > 1){
+            addingReplicaArray = new byte[addingReplicaArrayLength-1][4];
+            for (int i = 0; i < addingReplicaArray.length; i++) {
+                byte[] bytes = new byte[4];
+                inputStream.read(bytes);
+                removingReplicaArray[i] = bytes;
+            }
+        }
+
+        inputStream.read(leader);
+        inputStream.read(leaderEpoch);
+        inputStream.read(partitionEpoch);
+
+        directoriesArrayLength = readUnsignedVarInt(inputStream);
+        System.out.println("directoriesArrayLength size " + directoriesArrayLength);
+        if(directoriesArrayLength > 1){
+            directoriesArray = new byte[directoriesArrayLength-1][16];
+            for (int i = 0; i < directoriesArray.length; i++) {
+                byte[] bytes = new byte[16];
+                inputStream.read(bytes);
+                directoriesArray[i] = bytes;
+            }
+        }
+
+        taggedFieldsCount = readUnsignedVarInt(inputStream);
+        if(taggedFieldsCount != 0){
+            // TODO parse taggedFields
+            taggedFields = new byte[taggedFieldsCount];
+            inputStream.read(taggedFields);
+        }
+    }
 }

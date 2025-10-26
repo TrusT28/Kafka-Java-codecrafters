@@ -10,7 +10,7 @@ import endpoints.DescribeTopic.DescribeTopicEndpoint;
 import endpoints.Fetch.FetchEndpoint;
 import utils.ConstructorException;
 
-import static utils.Utils.*;
+import static utils.NumbersUtils.*;
 
 public class API {
     private final ApiMetadata[] SUPPORTED_APIs = {

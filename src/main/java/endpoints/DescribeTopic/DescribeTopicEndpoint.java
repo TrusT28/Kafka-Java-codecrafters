@@ -1,12 +1,13 @@
 package endpoints.DescribeTopic;
 
-import static utils.Utils.bytesToInt;
-import static utils.Utils.encodeVarInt;
-import static utils.Utils.intToBytes;
-import static utils.Utils.readUnsignedVarInt;
-import static utils.Utils.shortToBytes;
+import static utils.NumbersUtils.bytesToInt;
+import static utils.NumbersUtils.encodeVarInt;
+import static utils.NumbersUtils.intToBytes;
+import static utils.NumbersUtils.readUnsignedVarInt;
+import static utils.NumbersUtils.shortToBytes;
 
 import utils.ClusterMetadataException;
+import utils.ConstructorException;
 import utils.ErrorCodes;
 
 import java.io.ByteArrayInputStream;
@@ -28,7 +29,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
     ClusterMetadataReader clusterMetadataReader = new ClusterMetadataReader();
 
     @Override
-    public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException {
+    public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException, ConstructorException {
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
             try {
@@ -75,7 +76,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         }
     }
 
-    private void writeResponseBody(ByteArrayOutputStream responseBuffer, byte[][] topicNames, int responsePartitionsLimit) throws ClusterMetadataException, IOException {
+    private void writeResponseBody(ByteArrayOutputStream responseBuffer, byte[][] topicNames, int responsePartitionsLimit) throws ClusterMetadataException, IOException, ConstructorException {
           byte tag_buffer = 0;
         // Throttle time
           byte[] throttle_time_ms = intToBytes(0);
@@ -90,8 +91,8 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
               System.out.println("Failed reading clusterMetadata file. " + e.getMessage());
               throw e;
           }
-  
-          System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
+
+        System.out.println("Done reading metadata kafka file. batches:"+ metadataBatches.batchesArray.size());
           System.out.println("Total size of input topics names is " + topicNames.length);
           Arrays.stream(topicNames).forEach(name -> System.out.println(new String(name)));
           Map<String,byte[]> topicNameIdMap = metadataBatches.findTopicId(topicNames);
@@ -210,7 +211,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
             System.out.println("topicID is null");
 
             // Error Code
-            topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKOWN_TOPIC_ERROR_CODE));
+            topicsArrayBuffer.write(shortToBytes(ErrorCodes.UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE));
             // Topic Name
                 // String Length
                 // TODO remove after test

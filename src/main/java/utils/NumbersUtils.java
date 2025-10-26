@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Utils {
+public class NumbersUtils {
     public static int bytesToInt(byte[] bytes) {
         if (bytes.length == 4) {
             return ByteBuffer.wrap(bytes).getInt();

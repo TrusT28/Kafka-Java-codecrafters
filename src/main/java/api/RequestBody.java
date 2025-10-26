@@ -1,5 +1,5 @@
 package api;
-import static utils.Utils.bytesToInt;
+import static utils.NumbersUtils.bytesToInt;
     
 import java.io.DataInputStream;
 import java.io.EOFException;

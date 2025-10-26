@@ -1,6 +1,6 @@
 package endpoints.Fetch.models;
 
-import static utils.Utils.readUnsignedVarInt;
+import static utils.NumbersUtils.readUnsignedVarInt;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

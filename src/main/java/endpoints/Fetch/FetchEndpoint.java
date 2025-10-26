@@ -1,9 +1,9 @@
 package endpoints.Fetch;
 
-import static utils.Utils.bytesToInt;
-import static utils.Utils.encodeVarInt;
-import static utils.Utils.intToBytes;
-import static utils.Utils.shortToBytes;
+import static utils.NumbersUtils.bytesToInt;
+import static utils.NumbersUtils.encodeVarInt;
+import static utils.NumbersUtils.intToBytes;
+import static utils.NumbersUtils.shortToBytes;
 
 import utils.ConstructorException;
 import utils.ErrorCodes;
@@ -25,7 +25,7 @@ import endpoints.Fetch.models.FetchRequestTopic;
 public class FetchEndpoint implements KafkaEndpoint{
 
     @Override
-    public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException {
+    public void process(RequestBody requestBody, ByteArrayOutputStream responseBuffer) throws IOException, ConstructorException {
             // Only support 0-16 versions
             if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 16) {
                 System.out.println("Handling a proper request");
