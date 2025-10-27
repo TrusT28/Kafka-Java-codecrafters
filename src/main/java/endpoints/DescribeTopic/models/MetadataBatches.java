@@ -11,6 +11,8 @@ import java.util.Optional;
 
 import utils.ClusterMetadataException;
 
+import static utils.NumbersUtils.bytesToInt;
+
 public class MetadataBatches {
     public List<Batch> batchesArray = new ArrayList<>();
 
@@ -84,6 +86,40 @@ public class MetadataBatches {
                 return topicIdNameMap;
             }
             return null;
+        }
+
+        // (Name -> UUID)
+        public Map<String, byte[]> getTopicNameToUuidMap() {
+            Map<String, byte[]> map = new HashMap<>();
+            for (Batch batch : batchesArray) {
+                if (batch.records != null) {
+                    for (Record record : batch.records) {
+                        if (record.value instanceof TopicRecordValue) {
+                            TopicRecordValue topicValue = (TopicRecordValue) record.value;
+                            String name = new String(topicValue.topicName);
+                            map.put(name, topicValue.topicUUID);
+                        }
+                    }
+                }
+            }
+            return map;
+        }
+
+        public boolean partitionExists(byte[] topicUuid, int partitionIndex) {
+            for (Batch batch : batchesArray) {
+                if (batch.records != null) {
+                    for (Record record : batch.records) {
+                        if (record.value instanceof PartitionRecordValue) {
+                            PartitionRecordValue partValue = (PartitionRecordValue) record.value;
+                            if (Arrays.equals(partValue.topicUUID, topicUuid) &&
+                                    bytesToInt(partValue.partitionId) == partitionIndex) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
 }
