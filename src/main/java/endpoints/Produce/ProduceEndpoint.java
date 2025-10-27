@@ -89,7 +89,7 @@ public class ProduceEndpoint implements KafkaEndpoint {
                     byte[] logStartOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
                     responseBuffer.write(logStartOffset);
                     // Record Errors Array Length
-                    responseBuffer.write(0);
+                    responseBuffer.write(1);
                     // Error Message
                     responseBuffer.write(0);
                     // Tag Buffer
@@ -100,6 +100,7 @@ public class ProduceEndpoint implements KafkaEndpoint {
                 responseBuffer.write(tag_buffer);
             }
         }
+        // Throttle time
         byte[] throttle_time_ms = intToBytes(0);
         responseBuffer.write(throttle_time_ms);
         // Tag Buffer
