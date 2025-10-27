@@ -79,43 +79,14 @@ public class ProduceEndpoint implements KafkaEndpoint {
                             metadataBatches
                     );
                     responseBuffer.write(errorCode);
-//                    // TODO This is hardcoded for now, we should detect real error
-//                    TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
-//                    boolean topicExists = false;
-//                    if (topic.topicName!=null && topic.topicName.length>0) {
-//                        topicExists = topicMetadataReader.topicMetadataFileExists(Arrays.toString(topic.topicName));
-//                        System.out.println("Topic exists: " + topicExists);
-//                    }
-//                    if(topicExists) {
-//                        byte[] topicRecords = topicMetadataReader.readTopicRecords(Arrays.toString(topic.topicName));
-//                        ByteArrayInputStream topicsAsStream = new ByteArrayInputStream(topicRecords);
-//                        Record record = new Record(topicsAsStream);
-//                        if(record.value.getClass() == TopicRecordValue.class) {
-//                            TopicRecordValue value = (TopicRecordValue) record.value;
-//                            if (value.topicName == topic.topicName) {
-//                                responseBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
-//                            }
-//                            else{
-//                                responseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
-//                            }
-//                        }
-//                        else {
-//                            responseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
-//                        }
-//                    }
-//                    else {
-//                        responseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
-//                    }
-
-//                    responseBuffer.write(shortToBytes((short) ErrorCodes.UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE));
                     // Base offset
-                    byte[] baseOffset = longToBytes(-1);
+                    byte[] baseOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
                     responseBuffer.write(baseOffset);
                     // Log append time
                     byte[] logAppendTimeMs = longToBytes(-1);
                     responseBuffer.write(logAppendTimeMs);
                     // log_start_offset
-                    byte[] logStartOffset = longToBytes(-1);
+                    byte[] logStartOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
                     responseBuffer.write(logStartOffset);
                     // Record Errors Array Length
                     responseBuffer.write(0);
@@ -138,14 +109,14 @@ public class ProduceEndpoint implements KafkaEndpoint {
     private short validateTopicAndPartition(String topicName, int partitionIndex,
                                             Map<String, byte[]> topicNameToUuidMap,
                                             MetadataBatches metadataBatches) {
-        // Step 1: Check if topic exists
+        // Check if topic exists
         byte[] topicUuid = topicNameToUuidMap.get(topicName);
         if (topicUuid == null) {
             System.out.println("Topic does not exist: " + topicName);
             return ErrorCodes.UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE;
         }
 
-        // Step 2: Check if partition exists for this topic
+        // Check if partition exists for this topic
         boolean partitionExists = metadataBatches.partitionExists(topicUuid, partitionIndex);
         if (!partitionExists) {
             System.out.println("Partition " + partitionIndex + " does not exist for topic: " + topicName);
