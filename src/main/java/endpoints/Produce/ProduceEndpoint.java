@@ -59,46 +59,44 @@ public class ProduceEndpoint implements KafkaEndpoint {
 
         // Topics Array
         responseBuffer.write(encodeVarInt(requestBody.topicsArrayLength));
-        if(requestBody.topicsArrayLength>1) {
-            for(ProduceRequestTopic topic : requestBody.topics) {
-                System.out.println("Writing for topic name " + Arrays.toString(topic.topicName));
-                // Topic Name
-                responseBuffer.write(encodeVarInt(topic.topicNameLength));
-                responseBuffer.write(topic.topicName);
-                // Partitions Array
-                responseBuffer.write(encodeVarInt(topic.partitionsArrayLength));
-                for(ProduceRequestPartition partition : topic.partitionsArray) {
-                    // Partition Index
-                    responseBuffer.write(partition.partitionId);
+        for(ProduceRequestTopic topic : requestBody.topics) {
+            System.out.println("Writing for topic name " + Arrays.toString(topic.topicName));
+            // Topic Name
+            responseBuffer.write(encodeVarInt(topic.topicNameLength));
+            responseBuffer.write(topic.topicName);
+            // Partitions Array
+            responseBuffer.write(encodeVarInt(topic.partitionsArrayLength));
+            for(ProduceRequestPartition partition : topic.partitionsArray) {
+                // Partition Index
+                responseBuffer.write(partition.partitionId);
 
-                    // Validate topic and partition and write Error Code
-                    short errorCode = validateTopicAndPartition(
-                            new String(topic.topicName),
-                            bytesToInt(partition.partitionId),
-                            topicNameToUuidMap,
-                            metadataBatches
-                    );
-                    responseBuffer.write(errorCode);
-                    // Base offset
-                    byte[] baseOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
-                    responseBuffer.write(baseOffset);
-                    // Log append time
-                    byte[] logAppendTimeMs = longToBytes(-1);
-                    responseBuffer.write(logAppendTimeMs);
-                    // log_start_offset
-                    byte[] logStartOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
-                    responseBuffer.write(logStartOffset);
-                    // Record Errors Array Length
-                    responseBuffer.write(encodeVarInt(1));
-                    // Error Message
-                    responseBuffer.write(0);
-                    // Tag Buffer
-                    responseBuffer.write(tag_buffer);
-                }
-
-//                // Tag Buffer
-//                responseBuffer.write(tag_buffer);
+                // Validate topic and partition and write Error Code
+                short errorCode = validateTopicAndPartition(
+                        new String(topic.topicName),
+                        bytesToInt(partition.partitionId),
+                        topicNameToUuidMap,
+                        metadataBatches
+                );
+                responseBuffer.write(shortToBytes(errorCode));
+                // Base offset
+                byte[] baseOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
+                responseBuffer.write(baseOffset);
+                // Log append time
+                byte[] logAppendTimeMs = longToBytes(-1);
+                responseBuffer.write(logAppendTimeMs);
+                // log_start_offset
+                byte[] logStartOffset = errorCode==ErrorCodes.NO_ERROR ? longToBytes(0) : longToBytes(-1);
+                responseBuffer.write(logStartOffset);
+                // Record Errors Array Length
+                responseBuffer.write(encodeVarInt(1));
+                // Error Message
+                responseBuffer.write(0);
+                // Tag Buffer
+                responseBuffer.write(tag_buffer);
             }
+
+            // Tag Buffer
+            responseBuffer.write(tag_buffer);
         }
         // Throttle time
         byte[] throttle_time_ms = intToBytes(0);
