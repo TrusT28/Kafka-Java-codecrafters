@@ -29,6 +29,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
         // Only support 0-0 versions
         if (bytesToInt(requestBody.input_request_api_version) >= 0 && bytesToInt(requestBody.input_request_api_version) <= 0) {
             try {
+                // Request handling
                 byte tagBuffer = 0;
                 System.out.println("Handling a proper request");
                 ByteArrayInputStream bodyStream = new ByteArrayInputStream(requestBody.body);
@@ -48,7 +49,7 @@ public class DescribeTopicEndpoint implements KafkaEndpoint {
                     bodyStream.read(paginationTag);
                     // Tag Buffer
                     bodyStream.read();
-
+                // Response handling
                 // Response Header (v1)
                 responseBuffer.write(requestBody.input_correlation_id);
                 responseBuffer.write(tagBuffer);

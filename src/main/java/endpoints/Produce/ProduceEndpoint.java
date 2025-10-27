@@ -1,6 +1,11 @@
 package endpoints.Produce;
 
 import api.RequestBody;
+import endpoints.DescribeTopic.ClusterMetadataReader;
+import endpoints.DescribeTopic.models.MetadataBatches;
+import endpoints.DescribeTopic.models.Record;
+import endpoints.DescribeTopic.models.TopicRecordValue;
+import endpoints.Fetch.TopicMetadataReader;
 import endpoints.Fetch.models.FetchRequestBody;
 import endpoints.Fetch.models.FetchRequestTopic;
 import endpoints.KafkaEndpoint;
@@ -53,6 +58,33 @@ public class ProduceEndpoint implements KafkaEndpoint {
                     // TODO handle partitions response successfully
                     responseBuffer.write(partition.partitionId);
                     // TODO This is hardcoded for now, we should detect real error
+                    TopicMetadataReader topicMetadataReader = new TopicMetadataReader();
+                    boolean topicExists = false;
+                    if (topic.topicName!=null && topic.topicName.length>0) {
+                        topicExists = topicMetadataReader.topicMetadataFileExists(Arrays.toString(topic.topicName));
+                        System.out.println("Topic exists: " + topicExists);
+                    }
+                    if(topicExists) {
+                        byte[] topicRecords = topicMetadataReader.readTopicRecords(Arrays.toString(topic.topicName));
+                        ByteArrayInputStream topicsAsStream = new ByteArrayInputStream(topicRecords);
+                        Record record = new Record(topicsAsStream);
+                        if(record.value.getClass() == TopicRecordValue.class) {
+                            TopicRecordValue value = (TopicRecordValue) record.value;
+                            if (value.topicName == topic.topicName) {
+                                responseBuffer.write(shortToBytes(ErrorCodes.NO_ERROR));
+                            }
+                            else{
+                                responseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
+                            }
+                        }
+                        else {
+                            responseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
+                        }
+                    }
+                    else {
+                        responseBuffer.write(shortToBytes(ErrorCodes.FETCH_UNKOWN_TOPIC_ERROR_CODE));
+                    }
+
                     responseBuffer.write(shortToBytes((short) ErrorCodes.UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE));
                     // Base offset
                     byte[] baseOffset = longToBytes(-1);

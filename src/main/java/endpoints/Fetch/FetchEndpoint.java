@@ -5,6 +5,7 @@ import static utils.NumbersUtils.encodeVarInt;
 import static utils.NumbersUtils.intToBytes;
 import static utils.NumbersUtils.shortToBytes;
 
+import endpoints.DescribeTopic.models.Record;
 import utils.ConstructorException;
 import utils.ErrorCodes;
 

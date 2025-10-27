@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import endpoints.DescribeTopic.models.Record;
 import org.apache.commons.io.FileUtils;
 
 public class TopicMetadataReader {
