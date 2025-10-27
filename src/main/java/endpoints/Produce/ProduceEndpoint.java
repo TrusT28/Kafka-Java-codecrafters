@@ -93,11 +93,11 @@ public class ProduceEndpoint implements KafkaEndpoint {
                     // Error Message
                     responseBuffer.write(0);
                     // Tag Buffer
-                    responseBuffer.write(encodeVarInt(tag_buffer));
+                    responseBuffer.write(tag_buffer);
                 }
 
-                // Tag Buffer
-                responseBuffer.write(tag_buffer);
+//                // Tag Buffer
+//                responseBuffer.write(tag_buffer);
             }
         }
         // Throttle time
